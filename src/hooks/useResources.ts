@@ -42,7 +42,6 @@ export function useResources() {
     let file_path: string | undefined
 
     if (input.file) {
-      const ext = input.file.name.split('.').pop()
       const path = `${input.subject}/${Date.now()}-${input.file.name}`
 
       const { error: uploadError } = await supabase.storage
