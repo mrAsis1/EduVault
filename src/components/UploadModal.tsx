@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { IconCloudUpload, IconFileCheck, IconUpload, IconCheck, IconX } from '@tabler/icons-react'
-import { getSubjects, type Resource } from '../types'
+import { getSubjects, NO_SUBJECT, NO_TYPE, type Resource } from '../types'
 
 interface UploadModalProps {
   open: boolean
@@ -47,8 +47,8 @@ export default function UploadModal({ open, resources, editingResource, onClose,
 
   useEffect(() => {
     if (editingResource) {
-      setSubject(editingResource.subject)
-      setType(editingResource.type)
+      setSubject(editingResource.subject === NO_SUBJECT ? '' : editingResource.subject)
+      setType(editingResource.type === NO_TYPE ? '' : editingResource.type)
       setFormat(editingResource.format)
       setSize(editingResource.size)
       setStatus(editingResource.status)
@@ -96,8 +96,8 @@ export default function UploadModal({ open, resources, editingResource, onClose,
         for (const file of files) {
           await onSave({
             title: file.name,
-            subject: '',
-            type: 'Module',
+            subject: NO_SUBJECT,
+            type: NO_TYPE,
             format: detectFormat(file.name),
             size: formatSize(file.size),
             status: 'draft',
@@ -113,126 +113,128 @@ export default function UploadModal({ open, resources, editingResource, onClose,
 
   return (
     <div className="modal-overlay open" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal">
+      <div className="modal" style={{ display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
         <div className="modal-header">
           <h2>{editingResource ? 'Edit resource' : 'Upload files'}</h2>
         </div>
 
-        {editingResource ? (
-          <>
-            <div className="form-group">
-              <label>File</label>
-              <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{editingResource.title}</p>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="file-subject">Subject</label>
-              <input
-                id="file-subject"
-                list="subject-options"
-                value={subject}
-                onChange={e => setSubject(e.target.value)}
-                placeholder="Select existing or type a new subject..."
-                autoComplete="off"
-              />
-              <datalist id="subject-options">
-                {existingSubjects.map(s => <option key={s} value={s} />)}
-              </datalist>
-              {!existingSubjects.includes(subject.trim()) && subject.trim() && (
-                <p style={{ fontSize: 12, color: 'var(--master)', marginTop: 6 }}>
-                  "{subject.trim()}" will be added as a new subject.
-                </p>
-              )}
-            </div>
-
-            <div className="form-row">
+        <div style={{ overflowY: 'auto', flex: 1, minHeight: 0 }}>
+          {editingResource ? (
+            <>
               <div className="form-group">
-                <label htmlFor="file-type">Type</label>
-                <select id="file-type" value={type} onChange={e => setType(e.target.value as Resource['type'])}>
-                  <option value="">Select type...</option>
-                  <option value="Module">Module</option>
-                  <option value="Exercise">Exercise</option>
+                <label>File</label>
+                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{editingResource.title}</p>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="file-subject">Subject</label>
+                <input
+                  id="file-subject"
+                  list="subject-options"
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  placeholder="Select existing or type a new subject..."
+                  autoComplete="off"
+                />
+                <datalist id="subject-options">
+                  {existingSubjects.map(s => <option key={s} value={s} />)}
+                </datalist>
+                {!existingSubjects.includes(subject.trim()) && subject.trim() && (
+                  <p style={{ fontSize: 12, color: 'var(--master)', marginTop: 6 }}>
+                    "{subject.trim()}" will be added as a new subject.
+                  </p>
+                )}
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="file-type">Type</label>
+                  <select id="file-type" value={type} onChange={e => setType(e.target.value as Resource['type'])}>
+                    <option value="">Select type...</option>
+                    <option value="Module">Module</option>
+                    <option value="Exercise">Exercise</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="file-format">Format</label>
+                  <select id="file-format" value={format} onChange={e => setFormat(e.target.value)}>
+                    {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="file-size">File size</label>
+                <input id="file-size" value={size} onChange={e => setSize(e.target.value)} placeholder="e.g. 2.4 MB" />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="file-status">Status</label>
+                <select id="file-status" value={status} onChange={e => setStatus(e.target.value as Resource['status'])}>
+                  <option value="draft">Draft (master only)</option>
+                  <option value="public">Public (visible to students)</option>
                 </select>
               </div>
-              <div className="form-group">
-                <label htmlFor="file-format">Format</label>
-                <select id="file-format" value={format} onChange={e => setFormat(e.target.value)}>
-                  {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
-                </select>
+            </>
+          ) : (
+            <>
+              <div
+                className="dropzone"
+                onClick={() => document.getElementById('file-input')?.click()}
+                onDrop={e => {
+                  e.preventDefault()
+                  if (e.dataTransfer.files.length) handleFilesSelect(e.dataTransfer.files)
+                }}
+                onDragOver={e => e.preventDefault()}
+              >
+                <IconCloudUpload size={32} />
+                <p><span>Click to choose files</span> or drag and drop</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>PDF, DOCX, PPTX, XLSX — up to 50 MB each</p>
+                <input
+                  type="file"
+                  id="file-input"
+                  style={{ display: 'none' }}
+                  accept=".pdf,.docx,.pptx,.xlsx"
+                  multiple
+                  onChange={e => e.target.files?.length && handleFilesSelect(e.target.files)}
+                />
               </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="file-size">File size</label>
-              <input id="file-size" value={size} onChange={e => setSize(e.target.value)} placeholder="e.g. 2.4 MB" />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="file-status">Status</label>
-              <select id="file-status" value={status} onChange={e => setStatus(e.target.value as Resource['status'])}>
-                <option value="draft">Draft (master only)</option>
-                <option value="public">Public (visible to students)</option>
-              </select>
-            </div>
-          </>
-        ) : (
-          <>
-            <div
-              className="dropzone"
-              onClick={() => document.getElementById('file-input')?.click()}
-              onDrop={e => {
-                e.preventDefault()
-                if (e.dataTransfer.files.length) handleFilesSelect(e.dataTransfer.files)
-              }}
-              onDragOver={e => e.preventDefault()}
-            >
-              <IconCloudUpload size={32} />
-              <p><span>Click to choose files</span> or drag and drop</p>
-              <p style={{ fontSize: 12, marginTop: 4 }}>PDF, DOCX, PPTX, XLSX — up to 50 MB each</p>
-              <input
-                type="file"
-                id="file-input"
-                style={{ display: 'none' }}
-                accept=".pdf,.docx,.pptx,.xlsx"
-                multiple
-                onChange={e => e.target.files?.length && handleFilesSelect(e.target.files)}
-              />
-            </div>
-
-            {files.length > 0 && (
-              <div style={{ marginTop: 4 }}>
-                {files.map((file, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius)',
-                      marginBottom: 6, fontSize: 13,
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                      <IconFileCheck size={16} style={{ color: 'var(--success)', flexShrink: 0 }} />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(i)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', flexShrink: 0 }}
-                      title="Remove"
+              {files.length > 0 && (
+                <div style={{ marginTop: 4 }}>
+                  {files.map((file, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+                        marginBottom: 6, fontSize: 13,
+                      }}
                     >
-                      <IconX size={16} />
-                    </button>
-                  </div>
-                ))}
-                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-                  Files will be uploaded as drafts. Set subject, type, and status by editing each one afterward.
-                </p>
-              </div>
-            )}
-          </>
-        )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                        <IconFileCheck size={16} style={{ color: 'var(--success)', flexShrink: 0 }} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(i)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', flexShrink: 0 }}
+                        title="Remove"
+                      >
+                        <IconX size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                    Files will be uploaded as drafts with no subject/type set. Edit each one afterward.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
-        <div className="modal-actions">
+        <div className="modal-actions" style={{ paddingTop: 14, flexShrink: 0 }}>
           <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
           <button className="btn btn-master" onClick={handleSubmit} disabled={saving || !canSubmit}>
             {editingResource ? <IconCheck size={16} /> : <IconUpload size={16} />}

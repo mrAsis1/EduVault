@@ -3,18 +3,24 @@ import { getSubjects, type Resource } from '../types'
 
 interface SidebarProps {
   resources: Resource[]
+  isMaster: boolean
   activeSubject: string
   activeType: string
+  activeStatus: string
   onSubjectChange: (subject: string) => void
   onTypeChange: (type: string) => void
+  onStatusChange: (status: string) => void
 }
 
 export default function Sidebar({
   resources,
+  isMaster,
   activeSubject,
   activeType,
+  activeStatus,
   onSubjectChange,
   onTypeChange,
+  onStatusChange,
 }: SidebarProps) {
   const subjects = useMemo(() => getSubjects(resources), [resources])
 
@@ -72,6 +78,32 @@ export default function Sidebar({
           </button>
         </div>
       </div>
+
+      {isMaster && (
+        <div className="sidebar-section">
+          <div className="sidebar-title">Status</div>
+          <div className="type-filter">
+            <button
+              className={`type-btn ${activeStatus === 'All' ? 'active' : ''}`}
+              onClick={() => onStatusChange('All')}
+            >
+              <span className="dot" style={{ background: 'var(--muted)' }}></span> All
+            </button>
+            <button
+              className={`type-btn ${activeStatus === 'draft' ? 'active' : ''}`}
+              onClick={() => onStatusChange('draft')}
+            >
+              <span className="dot" style={{ background: 'var(--amber-text)' }}></span> Draft
+            </button>
+            <button
+              className={`type-btn ${activeStatus === 'public' ? 'active' : ''}`}
+              onClick={() => onStatusChange('public')}
+            >
+              <span className="dot" style={{ background: 'var(--success)' }}></span> Public
+            </button>
+          </div>
+        </div>
+      )}
     </aside>
   )
 }

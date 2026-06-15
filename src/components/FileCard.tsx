@@ -1,5 +1,5 @@
 import { IconDownload, IconPencil, IconTrash, IconEye, IconEyeOff } from '@tabler/icons-react'
-import { typeColors, type Resource } from '../types'
+import { typeColors, NO_SUBJECT, NO_TYPE, type Resource } from '../types'
 
 interface FileCardProps {
   resource: Resource
@@ -17,7 +17,9 @@ export default function FileCard({ resource, isMaster, onDownload, onEdit, onDel
   return (
     <article className="file-card" tabIndex={0}>
       <div className="card-top">
-        <span className="badge" style={{ background: c.bg, color: c.text }}>{resource.type}</span>
+        <span className="badge" style={{ background: c.bg, color: c.text }}>
+          {resource.type === NO_TYPE ? 'No type' : resource.type}
+        </span>
         {isMaster && (
           <span
             className="badge"
@@ -33,7 +35,7 @@ export default function FileCard({ resource, isMaster, onDownload, onEdit, onDel
       <div>
         <div className="card-title">{resource.title}</div>
         <div className="card-meta">
-          <span>{resource.subject || 'Unsorted'}</span>
+          <span>{resource.subject === NO_SUBJECT ? 'No subject' : resource.subject}</span>
           <span className="meta-dot"></span>
           <span>{resource.size}</span>
           <span className="meta-dot"></span>

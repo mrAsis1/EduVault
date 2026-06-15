@@ -16,6 +16,7 @@ export default function App() {
   const [isMaster, setIsMaster] = useState(false)
   const [activeSubject, setActiveSubject] = useState('All')
   const [activeType, setActiveType] = useState('All')
+  const [activeStatus, setActiveStatus] = useState('All')
 
   const [pwModalOpen, setPwModalOpen] = useState(false)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
@@ -37,9 +38,10 @@ export default function App() {
     return visibleResources.filter(r => {
       const ms = activeSubject === 'All' || r.subject === activeSubject
       const mt = activeType === 'All' || r.type === activeType
-      return ms && mt
+      const mst = !isMaster || activeStatus === 'All' || r.status === activeStatus
+      return ms && mt && mst
     })
-  }, [visibleResources, activeSubject, activeType])
+  }, [visibleResources, activeSubject, activeType, activeStatus, isMaster])
 
   const handleDownload = async (resource: Resource) => {
     try {
@@ -113,10 +115,13 @@ export default function App() {
       <div className="page">
         <Sidebar
           resources={visibleResources}
+          isMaster={isMaster}
           activeSubject={activeSubject}
           activeType={activeType}
+          activeStatus={activeStatus}
           onSubjectChange={setActiveSubject}
           onTypeChange={setActiveType}
+          onStatusChange={setActiveStatus}
         />
 
         <div className="content">
