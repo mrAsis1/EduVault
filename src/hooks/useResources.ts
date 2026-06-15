@@ -9,6 +9,7 @@ interface SaveInput {
   type: Resource['type']
   format: string
   size: string
+  status?: Resource['status']
   file?: File | null
 }
 
@@ -42,7 +43,7 @@ export function useResources() {
     let file_path: string | undefined
 
     if (input.file) {
-      const path = `${input.subject}/${Date.now()}-${input.file.name}`
+      const path = `${input.subject || 'unsorted'}/${Date.now()}-${input.file.name}`
 
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)
@@ -61,6 +62,7 @@ export function useResources() {
         format: input.format,
         size: input.size,
       }
+      if (input.status) updatePayload.status = input.status
       if (file_path) updatePayload.file_path = file_path
 
       const { error } = await supabase
@@ -78,6 +80,7 @@ export function useResources() {
         format: input.format,
         size: input.size,
         downloads: 0,
+        status: input.status ?? 'draft',
         file_path: file_path ?? null,
       })
 
@@ -87,6 +90,22 @@ export function useResources() {
     await fetchResources()
   }, [fetchResources])
 
+  // Toggle a resource between draft and public
+  const toggleStatus = useCallback(async (resource: Resource) => {
+    const newStatus: Resource['status'] = resource.status === 'draft' ? 'public' : 'draft'
+
+    const { error } = await supabase
+      .from(TABLE)
+      .update({ status: newStatus })
+      .eq('id', resource.id)
+
+    if (error) throw error
+
+    setResources(prev =>
+      prev.map(r => r.id === resource.id ? { ...r, status: newStatus } : r)
+    )
+  }, [])
+
   // Download a file and increment its download count
   const downloadResource = useCallback(async (resource: Resource) => {
     if (!resource.file_path) {
@@ -95,7 +114,6 @@ export function useResources() {
 
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(resource.file_path)
 
-    // Trigger browser download
     const link = document.createElement('a')
     link.href = data.publicUrl
     link.download = resource.title
@@ -104,7 +122,6 @@ export function useResources() {
     link.click()
     document.body.removeChild(link)
 
-    // Increment download count
     const { error } = await supabase
       .from(TABLE)
       .update({ downloads: resource.downloads + 1 })
@@ -140,6 +157,7 @@ export function useResources() {
     saveResource,
     downloadResource,
     deleteResource,
+    toggleStatus,
     refetch: fetchResources,
   }
 }

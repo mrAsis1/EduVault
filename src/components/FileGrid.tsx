@@ -8,9 +8,10 @@ interface FileGridProps {
   onDownload: (resource: Resource) => void
   onEdit: (resource: Resource) => void
   onDelete: (resource: Resource) => void
+  onToggleStatus: (resource: Resource) => void
 }
 
-export default function FileGrid({ resources, isMaster, onDownload, onEdit, onDelete }: FileGridProps) {
+export default function FileGrid({ resources, isMaster, onDownload, onEdit, onDelete, onToggleStatus }: FileGridProps) {
   if (!resources.length) {
     return (
       <div className="empty-state" style={{ display: 'block' }}>
@@ -31,6 +32,7 @@ export default function FileGrid({ resources, isMaster, onDownload, onEdit, onDe
           onDownload={onDownload}
           onEdit={onEdit}
           onDelete={onDelete}
+          onToggleStatus={onToggleStatus}
         />
       ))}
     </div>

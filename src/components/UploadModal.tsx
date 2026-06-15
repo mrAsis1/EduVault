@@ -14,19 +14,12 @@ interface UploadModalProps {
     type: Resource['type']
     format: string
     size: string
+    status?: Resource['status']
     file?: File | null
   }) => Promise<void>
 }
 
 const FORMATS = ['PDF', 'DOCX', 'PPTX', 'XLSX']
-
-interface FileEntry {
-  file: File
-  subject: string
-  type: Resource['type'] | ''
-  format: string
-  size: string
-}
 
 function formatSize(bytes: number): string {
   const kb = bytes / 1024
@@ -39,14 +32,15 @@ function detectFormat(filename: string): string {
 }
 
 export default function UploadModal({ open, resources, editingResource, onClose, onSave }: UploadModalProps) {
-  // Edit-mode fields (single existing resource — title is fixed, not editable)
+  // Edit-mode fields
   const [subject, setSubject] = useState('')
   const [type, setType] = useState<Resource['type'] | ''>('')
   const [format, setFormat] = useState('PDF')
   const [size, setSize] = useState('')
+  const [status, setStatus] = useState<Resource['status']>('draft')
 
-  // New-upload fields (one or more files)
-  const [entries, setEntries] = useState<FileEntry[]>([])
+  // New-upload: just the picked files
+  const [files, setFiles] = useState<File[]>([])
   const [saving, setSaving] = useState(false)
 
   const existingSubjects = useMemo(() => getSubjects(resources), [resources])
@@ -57,40 +51,31 @@ export default function UploadModal({ open, resources, editingResource, onClose,
       setType(editingResource.type)
       setFormat(editingResource.format)
       setSize(editingResource.size)
-      setEntries([])
+      setStatus(editingResource.status)
+      setFiles([])
     } else {
       setSubject('')
       setType('')
       setFormat('PDF')
       setSize('')
-      setEntries([])
+      setStatus('draft')
+      setFiles([])
     }
   }, [editingResource, open])
 
   if (!open) return null
 
-  const handleFilesSelect = (files: FileList | File[]) => {
-    const newEntries: FileEntry[] = Array.from(files).map(file => ({
-      file,
-      subject: '',
-      type: '',
-      format: detectFormat(file.name),
-      size: formatSize(file.size),
-    }))
-    setEntries(prev => [...prev, ...newEntries])
+  const handleFilesSelect = (incoming: FileList | File[]) => {
+    setFiles(prev => [...prev, ...Array.from(incoming)])
   }
 
-  const updateEntry = (index: number, patch: Partial<FileEntry>) => {
-    setEntries(prev => prev.map((e, i) => i === index ? { ...e, ...patch } : e))
-  }
-
-  const removeEntry = (index: number) => {
-    setEntries(prev => prev.filter((_, i) => i !== index))
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   const canSubmit = editingResource
     ? !!subject.trim() && !!type
-    : entries.length > 0 && entries.every(e => e.subject.trim() && e.type)
+    : files.length > 0
 
   const handleSubmit = async () => {
     if (!canSubmit) return
@@ -104,17 +89,19 @@ export default function UploadModal({ open, resources, editingResource, onClose,
           type: type as Resource['type'],
           format,
           size: size.trim() || '—',
+          status,
           file: null,
         })
       } else {
-        for (const entry of entries) {
+        for (const file of files) {
           await onSave({
-            title: entry.file.name,
-            subject: entry.subject.trim(),
-            type: entry.type as Resource['type'],
-            format: entry.format,
-            size: entry.size,
-            file: entry.file,
+            title: file.name,
+            subject: '',
+            type: 'Module',
+            format: detectFormat(file.name),
+            size: formatSize(file.size),
+            status: 'draft',
+            file,
           })
         }
       }
@@ -128,7 +115,7 @@ export default function UploadModal({ open, resources, editingResource, onClose,
     <div className="modal-overlay open" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-header">
-          <h2>{editingResource ? 'Edit resource' : 'Upload resources'}</h2>
+          <h2>{editingResource ? 'Edit resource' : 'Upload files'}</h2>
         </div>
 
         {editingResource ? (
@@ -158,25 +145,34 @@ export default function UploadModal({ open, resources, editingResource, onClose,
               )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="file-type">Type</label>
-              <select id="file-type" value={type} onChange={e => setType(e.target.value as Resource['type'])}>
-                <option value="">Select type...</option>
-                <option value="Module">Module</option>
-                <option value="Exercise">Exercise</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="file-format">Format</label>
-              <select id="file-format" value={format} onChange={e => setFormat(e.target.value)}>
-                {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="file-type">Type</label>
+                <select id="file-type" value={type} onChange={e => setType(e.target.value as Resource['type'])}>
+                  <option value="">Select type...</option>
+                  <option value="Module">Module</option>
+                  <option value="Exercise">Exercise</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="file-format">Format</label>
+                <select id="file-format" value={format} onChange={e => setFormat(e.target.value)}>
+                  {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="file-size">File size</label>
               <input id="file-size" value={size} onChange={e => setSize(e.target.value)} placeholder="e.g. 2.4 MB" />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="file-status">Status</label>
+              <select id="file-status" value={status} onChange={e => setStatus(e.target.value as Resource['status'])}>
+                <option value="draft">Draft (master only)</option>
+                <option value="public">Public (visible to students)</option>
+              </select>
             </div>
           </>
         ) : (
@@ -203,56 +199,36 @@ export default function UploadModal({ open, resources, editingResource, onClose,
               />
             </div>
 
-            {entries.map((entry, i) => (
-              <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 12, marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                    <IconFileCheck size={16} style={{ color: 'var(--success)', flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.file.name}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeEntry(i)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', flexShrink: 0 }}
-                    title="Remove"
+            {files.length > 0 && (
+              <div style={{ marginTop: 4 }}>
+                {files.map((file, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+                      marginBottom: 6, fontSize: 13,
+                    }}
                   >
-                    <IconX size={16} />
-                  </button>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: 8 }}>
-                  <label>Subject</label>
-                  <input
-                    list="subject-options"
-                    value={entry.subject}
-                    onChange={e => updateEntry(i, { subject: e.target.value })}
-                    placeholder="Select existing or type a new subject..."
-                    autoComplete="off"
-                  />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>Type</label>
-                    <select value={entry.type} onChange={e => updateEntry(i, { type: e.target.value as Resource['type'] })}>
-                      <option value="">Select type...</option>
-                      <option value="Module">Module</option>
-                      <option value="Exercise">Exercise</option>
-                    </select>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                      <IconFileCheck size={16} style={{ color: 'var(--success)', flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', flexShrink: 0 }}
+                      title="Remove"
+                    >
+                      <IconX size={16} />
+                    </button>
                   </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>Format</label>
-                    <select value={entry.format} onChange={e => updateEntry(i, { format: e.target.value })}>
-                      {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
-                    </select>
-                  </div>
-                </div>
+                ))}
+                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                  Files will be uploaded as drafts. Set subject, type, and status by editing each one afterward.
+                </p>
               </div>
-            ))}
-
-            <datalist id="subject-options">
-              {existingSubjects.map(s => <option key={s} value={s} />)}
-            </datalist>
+            )}
           </>
         )}
 
@@ -264,9 +240,9 @@ export default function UploadModal({ open, resources, editingResource, onClose,
               ? 'Saving...'
               : editingResource
                 ? 'Save changes'
-                : entries.length > 1
-                  ? `Upload ${entries.length} files`
-                  : 'Upload file'}
+                : files.length > 1
+                  ? `Upload ${files.length} files`
+                  : 'Upload'}
           </button>
         </div>
       </div>

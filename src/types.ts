@@ -7,6 +7,7 @@ export interface Resource {
   size: string
   downloads: number
   file_path: string | null
+  status: 'draft' | 'public'
   created_at?: string
 }
 

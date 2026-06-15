@@ -11,7 +11,7 @@ import { useResources } from './hooks/useResources'
 import type { Resource } from './types'
 
 export default function App() {
-  const { resources, loading, error, saveResource, downloadResource, deleteResource } = useResources()
+  const { resources, loading, error, saveResource, downloadResource, deleteResource, toggleStatus } = useResources()
 
   const [isMaster, setIsMaster] = useState(false)
   const [activeSubject, setActiveSubject] = useState('All')
@@ -28,13 +28,18 @@ export default function App() {
     setToast({ message, isError, visible: true })
   }
 
+  const visibleResources = useMemo(
+    () => isMaster ? resources : resources.filter(r => r.status === 'public'),
+    [resources, isMaster]
+  )
+
   const filtered = useMemo(() => {
-    return resources.filter(r => {
+    return visibleResources.filter(r => {
       const ms = activeSubject === 'All' || r.subject === activeSubject
       const mt = activeType === 'All' || r.type === activeType
       return ms && mt
     })
-  }, [resources, activeSubject, activeType])
+  }, [visibleResources, activeSubject, activeType])
 
   const handleDownload = async (resource: Resource) => {
     try {
@@ -63,10 +68,23 @@ export default function App() {
     }
   }
 
+  const handleToggleStatus = async (resource: Resource) => {
+    try {
+      await toggleStatus(resource)
+      showToast(
+        resource.status === 'draft'
+          ? `"${resource.title}" is now public.`
+          : `"${resource.title}" set back to draft.`
+      )
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Status update failed', true)
+    }
+  }
+
   const handleSave = async (input: Parameters<typeof saveResource>[0]) => {
     try {
       await saveResource(input)
-      showToast(input.id ? `"${input.title}" updated.` : `"${input.title}" uploaded successfully!`)
+      showToast(input.id ? `"${input.title}" updated.` : `"${input.title}" uploaded as draft.`)
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Save failed', true)
       throw e
@@ -94,7 +112,7 @@ export default function App() {
 
       <div className="page">
         <Sidebar
-          resources={resources}
+          resources={visibleResources}
           activeSubject={activeSubject}
           activeType={activeType}
           onSubjectChange={setActiveSubject}
@@ -119,6 +137,7 @@ export default function App() {
               onDownload={handleDownload}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus}
             />
           )}
         </div>
