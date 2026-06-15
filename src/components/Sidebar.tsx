@@ -1,4 +1,5 @@
-import { SUBJECTS, type Resource } from '../types'
+import { useMemo } from 'react'
+import { getSubjects, type Resource } from '../types'
 
 interface SidebarProps {
   resources: Resource[]
@@ -15,6 +16,8 @@ export default function Sidebar({
   onSubjectChange,
   onTypeChange,
 }: SidebarProps) {
+  const subjects = useMemo(() => getSubjects(resources), [resources])
+
   const countFor = (subject: string) =>
     subject === 'All' ? resources.length : resources.filter(r => r.subject === subject).length
 
@@ -29,7 +32,7 @@ export default function Sidebar({
           All Subjects
           <span className="count">{countFor('All')}</span>
         </button>
-        {SUBJECTS.map(subject => (
+        {subjects.map(subject => (
           <button
             key={subject}
             className={`subject-btn ${activeSubject === subject ? 'active' : ''}`}
@@ -39,6 +42,11 @@ export default function Sidebar({
             <span className="count">{countFor(subject)}</span>
           </button>
         ))}
+        {subjects.length === 0 && (
+          <p style={{ fontSize: 13, color: 'var(--muted)', padding: '4px 10px' }}>
+            No subjects yet.
+          </p>
+        )}
       </div>
 
       <div className="sidebar-section">

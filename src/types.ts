@@ -10,15 +10,9 @@ export interface Resource {
   created_at?: string
 }
 
-export const SUBJECTS = [
-  'Mathematics',
-  'Science',
-  'English',
-  'History',
-  'Filipino',
-  'TLE',
-  'MAPEH',
-] as const
+export function getSubjects(resources: Resource[]): string[] {
+  return Array.from(new Set(resources.map(r => r.subject.trim()).filter(Boolean))).sort()
+}
 
 export const typeColors: Record<Resource['type'], { bg: string; text: string; icon: string }> = {
   Module:   { bg: 'var(--purple-bg)', text: 'var(--purple-text)', icon: 'ti-file-text' },

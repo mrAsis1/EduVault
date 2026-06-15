@@ -88,15 +88,15 @@ export default function App() {
       />
 
       <div className="hero">
-  <div className="hero-inner">
-    <div className="hero-top">
-      <div>
-        <h1>School Resources</h1>
-        <p>Browse, search, and download learning materials.</p>
+        <div className="hero-inner">
+          <div className="hero-top">
+            <div>
+              <h1>School Resources</h1>
+              <p>Browse, search, and download learning materials.</p>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
       <div className="page">
         <Sidebar
@@ -144,6 +144,7 @@ export default function App() {
 
       <UploadModal
         open={uploadModalOpen}
+        resources={resources}
         editingResource={editingResource}
         onClose={() => { setUploadModalOpen(false); setEditingResource(null) }}
         onSave={handleSave}
