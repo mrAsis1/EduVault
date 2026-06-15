@@ -16,7 +16,6 @@ export default function App() {
   const [isMaster, setIsMaster] = useState(false)
   const [activeSubject, setActiveSubject] = useState('All')
   const [activeType, setActiveType] = useState('All')
-  const [search, setSearch] = useState('')
 
   const [pwModalOpen, setPwModalOpen] = useState(false)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
@@ -30,17 +29,12 @@ export default function App() {
   }
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase()
     return resources.filter(r => {
       const ms = activeSubject === 'All' || r.subject === activeSubject
       const mt = activeType === 'All' || r.type === activeType
-      const mq = !q ||
-        r.title.toLowerCase().includes(q) ||
-        r.subject.toLowerCase().includes(q) ||
-        r.format.toLowerCase().includes(q)
-      return ms && mt && mq
+      return ms && mt
     })
-  }, [resources, activeSubject, activeType, search])
+  }, [resources, activeSubject, activeType])
 
   const handleDownload = async (resource: Resource) => {
     try {
@@ -109,8 +103,6 @@ export default function App() {
 
         <div className="content">
           <Toolbar
-            search={search}
-            onSearchChange={setSearch}
             count={filtered.length}
             isMaster={isMaster}
             onUploadClick={() => { setEditingResource(null); setUploadModalOpen(true) }}

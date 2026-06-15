@@ -15,9 +15,6 @@ export default function FileCard({ resource, isMaster, onDownload, onEdit, onDel
   return (
     <article className="file-card" tabIndex={0}>
       <div className="card-top">
-        <div className="card-icon" style={{ background: c.bg }}>
-          <i className={`ti ${c.icon}`} style={{ color: c.text }} aria-hidden="true"></i>
-        </div>
         <span className="badge" style={{ background: c.bg, color: c.text }}>{resource.type}</span>
       </div>
       <div>
@@ -31,10 +28,6 @@ export default function FileCard({ resource, isMaster, onDownload, onEdit, onDel
         </div>
       </div>
       <div className="card-footer">
-        <div className="download-count">
-          <IconDownload size={14} />
-          {resource.downloads.toLocaleString()}
-        </div>
         {isMaster ? (
           <div className="card-actions">
             <button className="btn-icon btn-icon-edit" onClick={() => onEdit(resource)} title="Edit">
