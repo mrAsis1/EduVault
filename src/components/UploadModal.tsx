@@ -32,14 +32,11 @@ function detectFormat(filename: string): string {
 }
 
 export default function UploadModal({ open, resources, editingResource, onClose, onSave }: UploadModalProps) {
-  // Edit-mode fields
   const [subject, setSubject] = useState('')
   const [type, setType] = useState<Resource['type'] | ''>('')
   const [format, setFormat] = useState('PDF')
   const [size, setSize] = useState('')
   const [status, setStatus] = useState<Resource['status']>('draft')
-
-  // New-upload: just the picked files
   const [files, setFiles] = useState<File[]>([])
   const [saving, setSaving] = useState(false)
 
@@ -207,8 +204,8 @@ export default function UploadModal({ open, resources, editingResource, onClose,
                       key={i}
                       style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius)',
-                        marginBottom: 6, fontSize: 13,
+                        padding: '8px 10px', border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius)', marginBottom: 6, fontSize: 13,
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
@@ -226,7 +223,7 @@ export default function UploadModal({ open, resources, editingResource, onClose,
                     </div>
                   ))}
                   <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-                    Files will be uploaded as drafts with no subject/type set. Edit each one afterward.
+                    Files will be uploaded as drafts. Edit each one afterward to set subject, type, and status.
                   </p>
                 </div>
               )}

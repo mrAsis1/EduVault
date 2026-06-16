@@ -13,14 +13,9 @@ interface SidebarProps {
 }
 
 export default function Sidebar({
-  resources,
-  isMaster,
-  activeSubject,
-  activeType,
-  activeStatus,
-  onSubjectChange,
-  onTypeChange,
-  onStatusChange,
+  resources, isMaster,
+  activeSubject, activeType, activeStatus,
+  onSubjectChange, onTypeChange, onStatusChange,
 }: SidebarProps) {
   const subjects = useMemo(() => getSubjects(resources), [resources])
 

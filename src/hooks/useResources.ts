@@ -24,96 +24,83 @@ export function useResources() {
       .from(TABLE)
       .select('*')
       .order('created_at', { ascending: false })
-
-    if (error) {
-      setError(error.message)
-    } else {
-      setResources(data as Resource[])
-      setError(null)
-    }
+    if (error) { setError(error.message) }
+    else { setResources(data as Resource[]); setError(null) }
     setLoading(false)
   }, [])
 
-  useEffect(() => {
-    fetchResources()
-  }, [fetchResources])
+  useEffect(() => { fetchResources() }, [fetchResources])
 
-  // Create or update a resource, optionally uploading a new file
   const saveResource = useCallback(async (input: SaveInput) => {
     let file_path: string | undefined
 
     if (input.file) {
       const path = `${input.subject || 'unsorted'}/${Date.now()}-${input.file.name}`
-
       const { error: uploadError } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, input.file, { upsert: false })
-
+        .from(BUCKET).upload(path, input.file, { upsert: false })
       if (uploadError) throw uploadError
       file_path = path
     }
 
     if (input.id) {
-      // Update existing
       const updatePayload: Partial<Resource> = {
-        title: input.title,
-        subject: input.subject,
-        type: input.type,
-        format: input.format,
-        size: input.size,
+        title: input.title, subject: input.subject,
+        type: input.type, format: input.format, size: input.size,
       }
       if (input.status) updatePayload.status = input.status
       if (file_path) updatePayload.file_path = file_path
-
-      const { error } = await supabase
-        .from(TABLE)
-        .update(updatePayload)
-        .eq('id', input.id)
-
+      const { error } = await supabase.from(TABLE).update(updatePayload).eq('id', input.id)
       if (error) throw error
     } else {
-      // Insert new
       const { error } = await supabase.from(TABLE).insert({
-        title: input.title,
-        subject: input.subject,
-        type: input.type,
-        format: input.format,
-        size: input.size,
-        downloads: 0,
-        status: input.status ?? 'draft',
+        title: input.title, subject: input.subject,
+        type: input.type, format: input.format, size: input.size,
+        downloads: 0, status: input.status ?? 'draft',
         file_path: file_path ?? null,
       })
-
       if (error) throw error
     }
-
     await fetchResources()
   }, [fetchResources])
 
-  // Toggle a resource between draft and public
+  const bulkUpdate = useCallback(async (
+    ids: number[],
+    patch: { subject?: string; type?: Resource['type']; status?: Resource['status'] }
+  ) => {
+    const { error } = await supabase.from(TABLE).update(patch).in('id', ids)
+    if (error) throw error
+    setResources(prev =>
+      prev.map(r => ids.includes(r.id) ? { ...r, ...patch } : r)
+    )
+  }, [])
+
+  const bulkDelete = useCallback(async (ids: number[], allResources: Resource[]) => {
+    const filePaths = allResources
+      .filter(r => ids.includes(r.id) && r.file_path)
+      .map(r => r.file_path as string)
+
+    if (filePaths.length) {
+      const { error } = await supabase.storage.from(BUCKET).remove(filePaths)
+      if (error) throw error
+    }
+
+    const { error } = await supabase.from(TABLE).delete().in('id', ids)
+    if (error) throw error
+    setResources(prev => prev.filter(r => !ids.includes(r.id)))
+  }, [])
+
   const toggleStatus = useCallback(async (resource: Resource) => {
     const newStatus: Resource['status'] = resource.status === 'draft' ? 'public' : 'draft'
-
-    const { error } = await supabase
-      .from(TABLE)
-      .update({ status: newStatus })
-      .eq('id', resource.id)
-
+    const { error } = await supabase.from(TABLE).update({ status: newStatus }).eq('id', resource.id)
     if (error) throw error
-
     setResources(prev =>
       prev.map(r => r.id === resource.id ? { ...r, status: newStatus } : r)
     )
   }, [])
 
-  // Download a file and increment its download count
   const downloadResource = useCallback(async (resource: Resource) => {
-    if (!resource.file_path) {
-      throw new Error('No file attached to this resource')
-    }
-
+    if (!resource.file_path) throw new Error('No file attached to this resource')
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(resource.file_path)
-
     const link = document.createElement('a')
     link.href = data.publicUrl
     link.download = resource.title
@@ -121,43 +108,29 @@ export function useResources() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-
-    const { error } = await supabase
-      .from(TABLE)
-      .update({ downloads: resource.downloads + 1 })
-      .eq('id', resource.id)
-
+    const { error } = await supabase.from(TABLE)
+      .update({ downloads: resource.downloads + 1 }).eq('id', resource.id)
     if (error) throw error
-
     setResources(prev =>
       prev.map(r => r.id === resource.id ? { ...r, downloads: r.downloads + 1 } : r)
     )
   }, [])
 
-  // Delete a resource (and its file from storage, if any)
   const deleteResource = useCallback(async (resource: Resource) => {
     if (resource.file_path) {
       const { error: storageError } = await supabase.storage
-        .from(BUCKET)
-        .remove([resource.file_path])
-
+        .from(BUCKET).remove([resource.file_path])
       if (storageError) throw storageError
     }
-
     const { error } = await supabase.from(TABLE).delete().eq('id', resource.id)
     if (error) throw error
-
     setResources(prev => prev.filter(r => r.id !== resource.id))
   }, [])
 
   return {
-    resources,
-    loading,
-    error,
-    saveResource,
-    downloadResource,
-    deleteResource,
-    toggleStatus,
+    resources, loading, error,
+    saveResource, bulkUpdate, bulkDelete,
+    downloadResource, deleteResource, toggleStatus,
     refetch: fetchResources,
   }
 }

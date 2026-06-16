@@ -5,13 +5,19 @@ import type { Resource } from '../types'
 interface FileGridProps {
   resources: Resource[]
   isMaster: boolean
+  isSelecting: boolean
+  selectedIds: Set<number>
+  onSelect: (resource: Resource) => void
   onDownload: (resource: Resource) => void
   onEdit: (resource: Resource) => void
   onDelete: (resource: Resource) => void
   onToggleStatus: (resource: Resource) => void
 }
 
-export default function FileGrid({ resources, isMaster, onDownload, onEdit, onDelete, onToggleStatus }: FileGridProps) {
+export default function FileGrid({
+  resources, isMaster, isSelecting, selectedIds,
+  onSelect, onDownload, onEdit, onDelete, onToggleStatus,
+}: FileGridProps) {
   if (!resources.length) {
     return (
       <div className="empty-state" style={{ display: 'block' }}>
@@ -29,6 +35,9 @@ export default function FileGrid({ resources, isMaster, onDownload, onEdit, onDe
           key={r.id}
           resource={r}
           isMaster={isMaster}
+          isSelecting={isSelecting}
+          isSelected={selectedIds.has(r.id)}
+          onSelect={onSelect}
           onDownload={onDownload}
           onEdit={onEdit}
           onDelete={onDelete}
