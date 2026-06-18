@@ -19,7 +19,7 @@ interface UploadModalProps {
   }) => Promise<void>
 }
 
-const FORMATS = ['PDF', 'DOCX', 'PPTX', 'XLSX']
+const FORMATS = ['PDF', 'DOCX', 'PPTX', 'XLSX', 'ZIP']
 
 function formatSize(bytes: number): string {
   const kb = bytes / 1024
@@ -186,12 +186,12 @@ export default function UploadModal({ open, resources, editingResource, onClose,
               >
                 <IconCloudUpload size={32} />
                 <p><span>Click to choose files</span> or drag and drop</p>
-                <p style={{ fontSize: 12, marginTop: 4 }}>PDF, DOCX, PPTX, XLSX — up to 50 MB each</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>PDF, DOCX, PPTX, XLSX, ZIP — up to 50 MB each</p>
                 <input
                   type="file"
                   id="file-input"
                   style={{ display: 'none' }}
-                  accept=".pdf,.docx,.pptx,.xlsx"
+                  accept=".pdf,.docx,.pptx,.xlsx,.zip"
                   multiple
                   onChange={e => e.target.files?.length && handleFilesSelect(e.target.files)}
                 />
