@@ -193,13 +193,8 @@ export default function App() {
       <div className="page">
         <Sidebar
           resources={visibleResources}
-          isMaster={isMaster}
           activeSubject={activeSubject}
-          activeType={activeType}
-          activeStatus={activeStatus}
           onSubjectChange={setActiveSubject}
-          onTypeChange={setActiveType}
-          onStatusChange={setActiveStatus}
         />
 
         <div className="content">
@@ -209,6 +204,8 @@ export default function App() {
             isSelecting={isSelecting}
             selectedCount={selectedIds.size}
             allSelected={filtered.length > 0 && selectedIds.size === filtered.length}
+            activeType={activeType}
+            activeStatus={activeStatus}
             onUploadClick={() => { setEditingResource(null); setUploadModalOpen(true) }}
             onSelectToggle={handleSelectToggle}
             onSelectAll={handleSelectAll}
@@ -216,6 +213,8 @@ export default function App() {
             onBulkDraft={handleBulkDraft}
             onBulkEdit={() => setBulkEditOpen(true)}
             onBulkDelete={() => setBulkDeleteOpen(true)}
+            onTypeChange={setActiveType}
+            onStatusChange={setActiveStatus}
           />
 
           {loading ? (
