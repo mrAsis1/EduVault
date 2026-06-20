@@ -108,8 +108,7 @@ export function useResources() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    const { error } = await supabase.from(TABLE)
-      .update({ downloads: resource.downloads + 1 }).eq('id', resource.id)
+    const { error } = await supabase.rpc('increment_downloads', { row_id: resource.id })
     if (error) throw error
     setResources(prev =>
       prev.map(r => r.id === resource.id ? { ...r, downloads: r.downloads + 1 } : r)
