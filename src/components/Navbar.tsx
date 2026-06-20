@@ -1,12 +1,14 @@
-import { IconCrown } from '@tabler/icons-react'
+import { IconCrown, IconSun, IconMoon } from '@tabler/icons-react'
 
 interface NavbarProps {
   isMaster: boolean
+  theme: 'light' | 'dark'
   onMasterClick: () => void
   onExitMaster: () => void
+  onToggleTheme: () => void
 }
 
-export default function Navbar({ isMaster, onMasterClick, onExitMaster }: NavbarProps) {
+export default function Navbar({ isMaster, theme, onMasterClick, onExitMaster, onToggleTheme }: NavbarProps) {
   return (
     <nav>
       <div className="nav-inner">
@@ -28,6 +30,14 @@ export default function Navbar({ isMaster, onMasterClick, onExitMaster }: Navbar
               Master
             </button>
           )}
+          <button
+            className="btn-theme-toggle"
+            onClick={onToggleTheme}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}
+          </button>
         </div>
       </div>
     </nav>

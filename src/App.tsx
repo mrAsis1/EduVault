@@ -9,8 +9,10 @@ import BulkEditModal from './components/BulkEditModal'
 import PasswordModal from './components/PasswordModal'
 import Toast from './components/Toast'
 import { useResources } from './hooks/useResources'
+import { useTheme } from './hooks/useTheme'
 import { getSubjects } from './types'
 import type { Resource } from './types'
+
 
 export default function App() {
   const {
@@ -19,6 +21,7 @@ export default function App() {
     downloadResource, deleteResource, toggleStatus,
   } = useResources()
 
+  const { theme, toggleTheme } = useTheme()
   const [isMaster, setIsMaster] = useState(false)
   const [activeSubject, setActiveSubject] = useState('All')
   const [activeType, setActiveType] = useState('All')
@@ -170,7 +173,9 @@ export default function App() {
     <>
       <Navbar
         isMaster={isMaster}
+        theme={theme}
         onMasterClick={() => setPwModalOpen(true)}
+        onToggleTheme={toggleTheme}
         onExitMaster={() => {
           setIsMaster(false)
           setIsSelecting(false)
