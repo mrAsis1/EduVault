@@ -42,6 +42,69 @@ export default function Toolbar({
 }: ToolbarProps) {
   return (
     <>
+      {/* Sticky filter bar — always visible while scrolling */}
+      <div style={{
+        position: 'sticky',
+        top: 56, // matches nav height
+        zIndex: 90,
+        background: 'var(--bg)',
+        paddingTop: 10,
+        paddingBottom: 10,
+        marginBottom: 8,
+        borderBottom: '1px solid var(--border)',
+      }}>
+        {/* Type row */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+          padding: '0 2px',
+        }}>
+          <span style={{
+            fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
+            letterSpacing: '0.06em', color: 'var(--muted)', marginRight: 4, flexShrink: 0,
+          }}>
+            Type
+          </span>
+          {['All', 'Module', 'Exercise'].map(t => (
+            <button
+              key={t}
+              style={filterPill(activeType === t)}
+              onClick={() => onTypeChange(t)}
+            >
+              {t === 'All' ? 'All types' : t}
+            </button>
+          ))}
+        </div>
+
+        {/* Status row — master only */}
+        {isMaster && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+            borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8,
+            padding: '8px 2px 0',
+          }}>
+            <span style={{
+              fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
+              letterSpacing: '0.06em', color: 'var(--muted)', marginRight: 4, flexShrink: 0,
+            }}>
+              Status
+            </span>
+            {[
+              { value: 'All', label: 'All' },
+              { value: 'draft', label: 'Draft' },
+              { value: 'public', label: 'Public' },
+            ].map(s => (
+              <button
+                key={s.value}
+                style={filterPill(activeStatus === s.value)}
+                onClick={() => onStatusChange(s.value)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Action row */}
       <div className="toolbar">
         <div style={{ flex: 1 }} />
@@ -114,52 +177,6 @@ export default function Toolbar({
           </button>
         </div>
       )}
-
-      {/* Filter bar */}
-      <div style={{
-        display: 'flex', flexDirection: 'column', gap: 8,
-        padding: '10px 14px', background: 'var(--surface)',
-        border: '1px solid var(--border)', borderRadius: 'var(--radius)',
-        marginBottom: 14,
-      }}>
-        {/* Type row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', marginRight: 4, flexShrink: 0 }}>
-            Type
-          </span>
-          {['All', 'Module', 'Exercise'].map(t => (
-            <button
-              key={t}
-              style={filterPill(activeType === t)}
-              onClick={() => onTypeChange(t)}
-            >
-              {t === 'All' ? 'All types' : t}
-            </button>
-          ))}
-        </div>
-
-        {/* Status row — master only */}
-        {isMaster && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', borderTop: '1px solid var(--border)', paddingTop: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', marginRight: 4, flexShrink: 0 }}>
-              Status
-            </span>
-            {[
-              { value: 'All', label: 'All' },
-              { value: 'draft', label: 'Draft' },
-              { value: 'public', label: 'Public' },
-            ].map(s => (
-              <button
-                key={s.value}
-                style={filterPill(activeStatus === s.value)}
-                onClick={() => onStatusChange(s.value)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
 
       <div className="results-label">
         Showing <span>{count}</span> resources
