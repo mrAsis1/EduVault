@@ -5,17 +5,32 @@ interface SidebarProps {
   resources: Resource[]
   activeSubject: string
   onSubjectChange: (subject: string) => void
+  scrollTargetRef: React.RefObject<HTMLDivElement | null>
 }
 
 export default function Sidebar({
   resources,
   activeSubject,
   onSubjectChange,
+  scrollTargetRef,
 }: SidebarProps) {
   const subjects = useMemo(() => getSubjects(resources), [resources])
 
   const countFor = (subject: string) =>
     subject === 'All' ? resources.length : resources.filter(r => r.subject === subject).length
+
+  const handleSubjectChange = (subject: string) => {
+    onSubjectChange(subject)
+    if (scrollTargetRef.current) {
+      const navHeight = 56 // matches your nav height in CSS
+      const top =
+        scrollTargetRef.current.getBoundingClientRect().top +
+        window.scrollY -
+        navHeight -
+        8 // small breathing room
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  }
 
   return (
     <aside className="sidebar">
@@ -23,7 +38,7 @@ export default function Sidebar({
         <div className="sidebar-title">Subject</div>
         <button
           className={`subject-btn ${activeSubject === 'All' ? 'active' : ''}`}
-          onClick={() => onSubjectChange('All')}
+          onClick={() => handleSubjectChange('All')}
         >
           All Subjects
           <span className="count">{countFor('All')}</span>
@@ -32,7 +47,7 @@ export default function Sidebar({
           <button
             key={subject}
             className={`subject-btn ${activeSubject === subject ? 'active' : ''}`}
-            onClick={() => onSubjectChange(subject)}
+            onClick={() => handleSubjectChange(subject)}
           >
             {subject}
             <span className="count">{countFor(subject)}</span>

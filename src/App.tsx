@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import Toolbar from './components/Toolbar'
@@ -13,7 +13,6 @@ import { useTheme } from './hooks/useTheme'
 import { getSubjects } from './types'
 import type { Resource } from './types'
 
-
 export default function App() {
   const {
     resources, loading, error,
@@ -22,6 +21,9 @@ export default function App() {
   } = useResources()
 
   const { theme, toggleTheme } = useTheme()
+
+  const toolbarRef = useRef<HTMLDivElement>(null)
+
   const [isMaster, setIsMaster] = useState(false)
   const [activeSubject, setActiveSubject] = useState('All')
   const [activeType, setActiveType] = useState('All')
@@ -200,9 +202,11 @@ export default function App() {
           resources={visibleResources}
           activeSubject={activeSubject}
           onSubjectChange={setActiveSubject}
+          scrollTargetRef={toolbarRef}
         />
 
         <div className="content">
+          <div ref={toolbarRef} />
           <Toolbar
             count={filtered.length}
             isMaster={isMaster}
