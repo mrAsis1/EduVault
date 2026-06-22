@@ -1,11 +1,19 @@
-# EduVault
+# 🎓 EduVault
 
-A school resource-sharing platform where students can browse and download learning materials (modules, exercises) organized by subject. Includes a master/admin mode for uploading, editing, and deleting resources.
+EduVault is a web-based educational resource platform where students can browse and download learning materials such as modules and exercises organized by subject.
 
-## Features
+🌐 **Live Website:** https://edu-vault-iota-six.vercel.app
 
-- Browse resources by subject and type (Module / Exercise)
-- Search by title, subject, or format
-- Download files directly
-- Master mode for uploading, editing, and deleting resources (password-protected)
-- Real-time data and file storage via Supabase
+## ✨ Features
+
+- Browse resources by subject and category
+- Filter learning materials
+- Download files directly from the platform
+- Real-time database and file storage powered by Supabase
+- Responsive design for desktop and mobile devices
+
+## 🛠️ Tech Stack
+
+- Frontend: React + TypeScript (Vite)
+- Backend & Database: Supabase
+- Deployment: Vercel
