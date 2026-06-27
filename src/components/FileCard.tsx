@@ -22,8 +22,7 @@ export default function FileCard({
   const c = typeColors[resource.type]
   const isDraft = resource.status === 'draft'
   const isList = viewMode === 'list'
-  const titleRef = useScrollFade()
-  const metaRef = useScrollFade()
+  const setScrollRef = useScrollFade()
 
   if (isList) {
     return (
@@ -88,14 +87,14 @@ export default function FileCard({
           overflow: 'hidden',
         }}>
           <div
-            ref={titleRef}
+            ref={setScrollRef(0)}
             className="list-scroll-field at-start"
             style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}
           >
             {resource.title}
           </div>
           <div
-            ref={metaRef}
+            ref={setScrollRef(1)}
             className="list-scroll-field at-start"
             style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}
           >

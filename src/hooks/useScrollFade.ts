@@ -1,24 +1,44 @@
 import { useEffect, useRef } from 'react'
 
 export function useScrollFade() {
-  const ref = useRef<HTMLDivElement>(null)
+  const refs = useRef<(HTMLDivElement | null)[]>([])
+  const isSyncing = useRef(false)
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
+    const els = refs.current.filter(Boolean) as HTMLDivElement[]
+    if (!els.length) return
 
-    const update = () => {
-      const atStart = el.scrollLeft <= 2
-      const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 2
+    const updateFade = (el: HTMLDivElement, scrollLeft: number) => {
+      const atStart = scrollLeft <= 2
+      const atEnd = scrollLeft >= el.scrollWidth - el.clientWidth - 2
       el.classList.toggle('at-start', atStart)
       el.classList.toggle('at-end', atEnd)
     }
 
-    // Set initial state
-    update()
-    el.addEventListener('scroll', update)
-    return () => el.removeEventListener('scroll', update)
+    const handlers = els.map(el => {
+      const handler = () => {
+        if (isSyncing.current) return
+        isSyncing.current = true
+        // sync all other els to this one's scroll position
+        els.forEach(other => {
+          other.scrollLeft = el.scrollLeft
+          updateFade(other, el.scrollLeft)
+        })
+        isSyncing.current = false
+      }
+      el.addEventListener('scroll', handler)
+      updateFade(el, 0)
+      return { el, handler }
+    })
+
+    return () => {
+      handlers.forEach(({ el, handler }) => el.removeEventListener('scroll', handler))
+    }
   }, [])
 
-  return ref
+  const setRef = (index: number) => (el: HTMLDivElement | null) => {
+    refs.current[index] = el
+  }
+
+  return setRef
 }
