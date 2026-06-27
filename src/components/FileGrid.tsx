@@ -7,6 +7,7 @@ interface FileGridProps {
   isMaster: boolean
   isSelecting: boolean
   selectedIds: Set<number>
+  viewMode: 'grid' | 'list'
   onSelect: (resource: Resource) => void
   onDownload: (resource: Resource) => void
   onEdit: (resource: Resource) => void
@@ -15,7 +16,7 @@ interface FileGridProps {
 }
 
 export default function FileGrid({
-  resources, isMaster, isSelecting, selectedIds,
+  resources, isMaster, isSelecting, selectedIds, viewMode,
   onSelect, onDownload, onEdit, onDelete, onToggleStatus,
 }: FileGridProps) {
   if (!resources.length) {
@@ -29,7 +30,7 @@ export default function FileGrid({
   }
 
   return (
-    <div className="file-grid">
+    <div className={viewMode === 'list' ? 'file-list' : 'file-grid'}>
       {resources.map(r => (
         <FileCard
           key={r.id}
@@ -37,6 +38,7 @@ export default function FileGrid({
           isMaster={isMaster}
           isSelecting={isSelecting}
           isSelected={selectedIds.has(r.id)}
+          viewMode={viewMode}
           onSelect={onSelect}
           onDownload={onDownload}
           onEdit={onEdit}
