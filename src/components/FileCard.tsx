@@ -1,5 +1,6 @@
 import { IconDownload, IconPencil, IconTrash, IconEye, IconEyeOff } from '@tabler/icons-react'
 import { typeColors, NO_SUBJECT, NO_TYPE, type Resource } from '../types'
+import { useScrollFade } from '../hooks/useScrollFade'
 
 interface FileCardProps {
   resource: Resource
@@ -21,6 +22,8 @@ export default function FileCard({
   const c = typeColors[resource.type]
   const isDraft = resource.status === 'draft'
   const isList = viewMode === 'list'
+  const titleRef = useScrollFade()
+  const metaRef = useScrollFade()
 
   if (isList) {
     return (
@@ -78,31 +81,24 @@ export default function FileCard({
           </span>
         )}
 
-        {/* Title + subject — two lines, fades if too long */}
+        {/* Title + subject — scrollable on overflow */}
         <div style={{
           flex: 1,
           minWidth: 0,
           overflow: 'hidden',
         }}>
-          <div style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: 'var(--text)',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-          }}>
+          <div
+            ref={titleRef}
+            className="list-scroll-field at-start"
+            style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}
+          >
             {resource.title}
           </div>
-          <div style={{
-            fontSize: 11,
-            color: 'var(--muted)',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
-          }}>
+          <div
+            ref={metaRef}
+            className="list-scroll-field at-start"
+            style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}
+          >
             {resource.subject === NO_SUBJECT ? 'No subject' : resource.subject}
             <span style={{ margin: '0 4px', opacity: 0.4 }}>·</span>
             {resource.size}

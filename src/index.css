@@ -196,6 +196,45 @@ nav { background:var(--surface); border-bottom:1px solid var(--border); position
 /* Download label switching */
 .btn-download-list .download-label { display: inline; }
 
+/* Scrollable text field with fade edges */
+.list-scroll-field {
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+.list-scroll-field::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+/* Fade wrapper */
+.list-scroll-field {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8px,
+    black calc(100% - 8px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8px,
+    black calc(100% - 8px),
+    transparent 100%
+  );
+}
+/* When scrolled to start, no left fade */
+.list-scroll-field.at-start {
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 8px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 8px), transparent 100%);
+}
+/* When scrolled to end, no right fade */
+.list-scroll-field.at-end {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8px);
+  mask-image: linear-gradient(to right, transparent 0%, black 8px);
+}
+
 @media(max-width:768px){
   .page { grid-template-columns:1fr; }
   .sidebar { position:static; }
