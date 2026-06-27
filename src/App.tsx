@@ -24,6 +24,7 @@ export default function App() {
 
   const toolbarRef = useRef<HTMLDivElement>(null)
 
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isMaster, setIsMaster] = useState(false)
   const [activeSubject, setActiveSubject] = useState('All')
   const [activeType, setActiveType] = useState('All')
@@ -215,6 +216,8 @@ export default function App() {
             allSelected={filtered.length > 0 && selectedIds.size === filtered.length}
             activeType={activeType}
             activeStatus={activeStatus}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
             onUploadClick={() => { setEditingResource(null); setUploadModalOpen(true) }}
             onSelectToggle={handleSelectToggle}
             onSelectAll={handleSelectAll}
@@ -233,6 +236,7 @@ export default function App() {
           ) : (
             <FileGrid
               resources={filtered}
+              viewMode={viewMode}
               isMaster={isMaster}
               isSelecting={isSelecting}
               selectedIds={selectedIds}

@@ -184,6 +184,18 @@ nav { background:var(--surface); border-bottom:1px solid var(--border); position
 .toast svg { color:var(--success); flex-shrink:0; }
 .toast.err svg { color:var(--danger); }
 
+/* LIST VIEW */
+.file-list { display: flex; flex-direction: column; gap: 6px; }
+.file-card-list { transition: border-color 0.15s, box-shadow 0.15s; }
+.file-card-list:hover { border-color: var(--accent) !important; box-shadow: 0 2px 8px rgba(44,95,138,0.1); }
+
+/* Badge short/full switching */
+.badge-short { display: none; }
+.badge-full  { display: inline; }
+
+/* Download label switching */
+.btn-download-list .download-label { display: inline; }
+
 @media(max-width:768px){
   .page { grid-template-columns:1fr; }
   .sidebar { position:static; }
