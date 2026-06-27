@@ -8,6 +8,16 @@ export function useScrollFade() {
     const els = refs.current.filter(Boolean) as HTMLDivElement[]
     if (!els.length) return
 
+    const syncWidths = () => {
+      // find the widest scrollWidth among all els
+      const maxScrollWidth = Math.max(...els.map(el => el.scrollWidth))
+      // force all inner content to that width so shorter rows scroll the same distance
+      els.forEach(el => {
+        const inner = el.querySelector('.scroll-inner') as HTMLElement | null
+        if (inner) inner.style.minWidth = `${maxScrollWidth}px`
+      })
+    }
+
     const updateFade = (el: HTMLDivElement, scrollLeft: number) => {
       const atStart = scrollLeft <= 2
       const atEnd = scrollLeft >= el.scrollWidth - el.clientWidth - 2
@@ -19,7 +29,6 @@ export function useScrollFade() {
       const handler = () => {
         if (isSyncing.current) return
         isSyncing.current = true
-        // sync all other els to this one's scroll position
         els.forEach(other => {
           other.scrollLeft = el.scrollLeft
           updateFade(other, el.scrollLeft)
@@ -31,8 +40,14 @@ export function useScrollFade() {
       return { el, handler }
     })
 
+    // sync widths after mount and on resize
+    syncWidths()
+    const ro = new ResizeObserver(syncWidths)
+    els.forEach(el => ro.observe(el))
+
     return () => {
       handlers.forEach(({ el, handler }) => el.removeEventListener('scroll', handler))
+      ro.disconnect()
     }
   }, [])
 
