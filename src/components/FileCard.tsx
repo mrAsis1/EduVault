@@ -85,24 +85,30 @@ export default function FileCard({
           flex: 1,
           minWidth: 0,
           overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 2,
         }}>
           <div
             ref={setScrollRef(0)}
             className="list-scroll-field at-start"
-            style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}
+            style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', lineHeight: 1.4 }}
           >
-            {resource.title}
+            <span className="scroll-inner">{resource.title}</span>
           </div>
           <div
             ref={setScrollRef(1)}
             className="list-scroll-field at-start"
-            style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}
+            style={{ fontSize: 11, color: 'var(--muted)', lineHeight: 1.4 }}
           >
-            {resource.subject === NO_SUBJECT ? 'No subject' : resource.subject}
-            <span style={{ margin: '0 4px', opacity: 0.4 }}>·</span>
-            {resource.size}
-            <span style={{ margin: '0 4px', opacity: 0.4 }}>·</span>
-            {resource.format}
+            <span className="scroll-inner">
+              {resource.subject === NO_SUBJECT ? 'No subject' : resource.subject}
+              <span style={{ margin: '0 4px', opacity: 0.4 }}>·</span>
+              {resource.size}
+              <span style={{ margin: '0 4px', opacity: 0.4 }}>·</span>
+              {resource.format}
+            </span>
           </div>
         </div>
 

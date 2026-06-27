@@ -191,53 +191,61 @@ nav { background:var(--surface); border-bottom:1px solid var(--border); position
 
 /* Badge short/full switching */
 .badge-short { display: none; }
-.badge-full  { display: inline; }
+.badge-full { display: inline; }
 
 /* Download label switching */
 .btn-download-list .download-label { display: inline; }
 
-/* Scrollable text field with fade edges */
+/* Scrollable text field with dynamic fade edges */
 .list-scroll-field {
   overflow-x: auto;
   white-space: nowrap;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   cursor: grab;
   -webkit-overflow-scrolling: touch;
-}
-.list-scroll-field::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-
-/* Fade wrapper */
-.list-scroll-field {
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0%,
-    black 8px,
-    black calc(100% - 8px),
+    black 4px,
+    black calc(100% - 16px),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0%,
-    black 8px,
-    black calc(100% - 8px),
+    black 4px,
+    black calc(100% - 16px),
     transparent 100%
   );
 }
-/* When scrolled to start, no left fade */
+.list-scroll-field::-webkit-scrollbar { display: none; }
+
+/* At start — no left fade */
 .list-scroll-field.at-start {
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 8px), transparent 100%);
-  mask-image: linear-gradient(to right, black calc(100% - 8px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 16px), transparent 100%);
 }
-/* When scrolled to end, no right fade */
+/* At end — no right fade */
 .list-scroll-field.at-end {
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8px);
-  mask-image: linear-gradient(to right, transparent 0%, black 8px);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4px);
+  mask-image: linear-gradient(to right, transparent 0%, black 4px);
+}
+/* At start AND end (content fits) — no fade at all */
+.list-scroll-field.at-start.at-end {
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
-@media(max-width:768px){
-  .page { grid-template-columns:1fr; }
-  .sidebar { position:static; }
-  .hero h1 { font-size:22px; }
-  .stats-row { grid-template-columns:repeat(2,1fr); }
+@media (max-width: 540px) {
+  .badge-short { display: inline; }
+  .badge-full { display: none; }
+  .btn-download-list .download-label { display: none; }
+}
+
+@media (max-width: 768px) {
+  .page { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+  .hero h1 { font-size: 22px; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
 }
