@@ -126,10 +126,22 @@ export function useResources() {
     setResources(prev => prev.filter(r => r.id !== resource.id))
   }, [])
 
+  const renameTitle = useCallback(async (resource: Resource, newTitle: string) => {
+    const { error } = await supabase
+      .from(TABLE)
+      .update({ title: newTitle })
+      .eq('id', resource.id)
+    if (error) throw error
+    setResources(prev =>
+      prev.map(r => r.id === resource.id ? { ...r, title: newTitle } : r)
+    )
+  }, [])
+
   return {
     resources, loading, error,
     saveResource, bulkUpdate, bulkDelete,
     downloadResource, deleteResource, toggleStatus,
+    renameTitle,
     refetch: fetchResources,
   }
 }

@@ -18,6 +18,7 @@ export default function App() {
     resources, loading, error,
     saveResource, bulkUpdate, bulkDelete,
     downloadResource, deleteResource, toggleStatus,
+    renameTitle,
   } = useResources()
 
   const { theme, toggleTheme } = useTheme()
@@ -172,6 +173,15 @@ export default function App() {
     }
   }
 
+  const handleRenameTitle = async (resource: Resource, newTitle: string) => {
+    try {
+      await renameTitle(resource, newTitle)
+      showToast(`Renamed to "${newTitle}".`)
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Rename failed', true)
+    }
+  }
+
   return (
     <>
       <Navbar
@@ -245,6 +255,7 @@ export default function App() {
               onEdit={handleEdit}
               onDelete={r => setDeletingResource(r)}
               onToggleStatus={handleToggleStatus}
+              onRenameTitle={handleRenameTitle}
             />
           )}
         </div>

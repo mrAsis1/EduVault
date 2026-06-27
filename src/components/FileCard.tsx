@@ -1,4 +1,5 @@
-import { IconDownload, IconPencil, IconTrash, IconEye, IconEyeOff } from '@tabler/icons-react'
+import { useRef, useState } from 'react'
+import { IconDownload, IconPencil, IconTrash, IconEye, IconEyeOff, IconCheck, IconX } from '@tabler/icons-react'
 import { typeColors, NO_SUBJECT, NO_TYPE, type Resource } from '../types'
 import { useScrollFade } from '../hooks/useScrollFade'
 
@@ -13,11 +14,103 @@ interface FileCardProps {
   onEdit: (resource: Resource) => void
   onDelete: (resource: Resource) => void
   onToggleStatus: (resource: Resource) => void
+  onRenameTitle: (resource: Resource, newTitle: string) => Promise<void>
+}
+
+interface EditableTitleProps {
+  resource: Resource
+  onRenameTitle: (resource: Resource, newTitle: string) => Promise<void>
+}
+
+function EditableTitle({ resource, onRenameTitle }: EditableTitleProps) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(resource.title)
+  const [saving, setSaving] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleSave = async () => {
+    const trimmed = value.trim()
+    if (!trimmed || trimmed === resource.title) {
+      setValue(resource.title)
+      setEditing(false)
+      return
+    }
+    setSaving(true)
+    try {
+      await onRenameTitle(resource, trimmed)
+      setEditing(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setValue(resource.title)
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+        <input
+          ref={inputRef}
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') handleSave()
+            if (e.key === 'Escape') handleCancel()
+          }}
+          autoFocus
+          disabled={saving}
+          style={{
+            flex: 1,
+            fontSize: 14,
+            fontWeight: 600,
+            fontFamily: 'Inter, sans-serif',
+            color: 'var(--text)',
+            background: 'var(--surface2)',
+            border: '1.5px solid var(--accent)',
+            borderRadius: 6,
+            padding: '3px 7px',
+            outline: 'none',
+            minWidth: 0,
+          }}
+        />
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--success)', padding: 2, flexShrink: 0 }}
+          title="Save"
+        >
+          <IconCheck size={15} />
+        </button>
+        <button
+          onClick={handleCancel}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', padding: 2, flexShrink: 0 }}
+          title="Cancel"
+        >
+          <IconX size={15} />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="card-title"
+      style={{ cursor: 'text', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}
+      onClick={() => setEditing(true)}
+      title="Click to rename"
+    >
+      <span style={{ flex: 1 }}>{resource.title}</span>
+      <IconPencil size={12} style={{ color: 'var(--muted)', flexShrink: 0, opacity: 0.5 }} />
+    </div>
+  )
 }
 
 export default function FileCard({
   resource, isMaster, isSelecting, isSelected, viewMode,
-  onSelect, onDownload, onEdit, onDelete, onToggleStatus,
+  onSelect, onDownload, onEdit, onDelete, onToggleStatus, onRenameTitle,
 }: FileCardProps) {
   const c = typeColors[resource.type]
   const isDraft = resource.status === 'draft'
@@ -55,7 +148,7 @@ export default function FileCard({
           />
         )}
 
-        {/* Type badge — single letter on mobile, full on desktop */}
+        {/* Type badge */}
         <span className="badge badge-type" style={{ background: c.bg, color: c.text, flexShrink: 0 }}>
           <span className="badge-short">
             {resource.type === NO_TYPE ? '?' : resource.type === 'Module' ? 'M' : 'E'}
@@ -80,7 +173,7 @@ export default function FileCard({
           </span>
         )}
 
-        {/* Title + subject — scrollable on overflow */}
+        {/* Title + subject — scrollable */}
         <div style={{
           flex: 1,
           minWidth: 0,
@@ -131,18 +224,15 @@ export default function FileCard({
             </button>
           </div>
         ) : !isMaster ? (
-          <>
-            {/* Icon-only on mobile, icon + text on desktop */}
-            <button
-              className="btn-download btn-download-list"
-              onClick={() => onDownload(resource)}
-              style={{ flexShrink: 0 }}
-              title="Download"
-            >
-              <IconDownload size={14} />
-              <span className="download-label">Download</span>
-            </button>
-          </>
+          <button
+            className="btn-download btn-download-list"
+            onClick={() => onDownload(resource)}
+            style={{ flexShrink: 0 }}
+            title="Download"
+          >
+            <IconDownload size={14} />
+            <span className="download-label">Download</span>
+          </button>
         ) : null}
       </article>
     )
@@ -192,7 +282,10 @@ export default function FileCard({
       </div>
 
       <div>
-        <div className="card-title">{resource.title}</div>
+        {isMaster && !isSelecting
+          ? <EditableTitle resource={resource} onRenameTitle={onRenameTitle} />
+          : <div className="card-title">{resource.title}</div>
+        }
         <div className="card-meta">
           <span>{resource.subject === NO_SUBJECT ? 'No subject' : resource.subject}</span>
           <span className="meta-dot"></span>
