@@ -32,6 +32,7 @@ function detectFormat(filename: string): string {
 }
 
 export default function UploadModal({ open, resources, editingResource, onClose, onSave }: UploadModalProps) {
+  const [title, setTitle] = useState('')
   const [subject, setSubject] = useState('')
   const [type, setType] = useState<Resource['type'] | ''>('')
   const [format, setFormat] = useState('PDF')
@@ -44,6 +45,7 @@ export default function UploadModal({ open, resources, editingResource, onClose,
 
   useEffect(() => {
     if (editingResource) {
+      setTitle(editingResource.title)
       setSubject(editingResource.subject === NO_SUBJECT ? '' : editingResource.subject)
       setType(editingResource.type === NO_TYPE ? '' : editingResource.type)
       setFormat(editingResource.format)
@@ -51,6 +53,7 @@ export default function UploadModal({ open, resources, editingResource, onClose,
       setStatus(editingResource.status)
       setFiles([])
     } else {
+      setTitle('')
       setSubject('')
       setType('')
       setFormat('PDF')
@@ -71,7 +74,7 @@ export default function UploadModal({ open, resources, editingResource, onClose,
   }
 
   const canSubmit = editingResource
-    ? !!subject.trim() && !!type
+    ? !!title.trim() && !!subject.trim() && !!type
     : files.length > 0
 
   const handleSubmit = async () => {
@@ -81,7 +84,7 @@ export default function UploadModal({ open, resources, editingResource, onClose,
       if (editingResource) {
         await onSave({
           id: editingResource.id,
-          title: editingResource.title,
+          title: title.trim(),
           subject: subject.trim(),
           type: type as Resource['type'],
           format,
@@ -118,9 +121,16 @@ export default function UploadModal({ open, resources, editingResource, onClose,
         <div style={{ overflowY: 'auto', flex: 1, minHeight: 0 }}>
           {editingResource ? (
             <>
+              {/* Editable title/filename */}
               <div className="form-group">
-                <label>File</label>
-                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{editingResource.title}</p>
+                <label htmlFor="file-title">File name</label>
+                <input
+                  id="file-title"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="Enter file name..."
+                  autoComplete="off"
+                />
               </div>
 
               <div className="form-group">

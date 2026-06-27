@@ -13,11 +13,12 @@ interface FileGridProps {
   onEdit: (resource: Resource) => void
   onDelete: (resource: Resource) => void
   onToggleStatus: (resource: Resource) => void
+  onRenameTitle: (resource: Resource, newTitle: string) => Promise<void>
 }
 
 export default function FileGrid({
   resources, isMaster, isSelecting, selectedIds, viewMode,
-  onSelect, onDownload, onEdit, onDelete, onToggleStatus,
+  onSelect, onDownload, onEdit, onDelete, onToggleStatus, onRenameTitle,
 }: FileGridProps) {
   if (!resources.length) {
     return (
@@ -44,6 +45,7 @@ export default function FileGrid({
           onEdit={onEdit}
           onDelete={onDelete}
           onToggleStatus={onToggleStatus}
+          onRenameTitle={onRenameTitle}
         />
       ))}
     </div>
