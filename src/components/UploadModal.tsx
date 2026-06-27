@@ -19,7 +19,7 @@ interface UploadModalProps {
   }) => Promise<void>
 }
 
-const FORMATS = ['PDF', 'DOCX', 'PPTX', 'XLSX', 'ZIP']
+const FORMATS = ['PDF', 'DOCX', 'PPTX', 'XLSX', 'ZIP', 'JPG', 'JPEG', 'PNG', 'GIF', 'WEBP', 'SVG']
 
 function formatSize(bytes: number): string {
   const kb = bytes / 1024
@@ -28,7 +28,7 @@ function formatSize(bytes: number): string {
 
 function detectFormat(filename: string): string {
   const ext = filename.split('.').pop()?.toUpperCase()
-  return ext && FORMATS.includes(ext) ? ext : 'PDF'
+  return ext && FORMATS.includes(ext) ? ext : 'FILE'
 }
 
 export default function UploadModal({ open, resources, editingResource, onClose, onSave }: UploadModalProps) {
@@ -196,12 +196,12 @@ export default function UploadModal({ open, resources, editingResource, onClose,
               >
                 <IconCloudUpload size={32} />
                 <p><span>Click to choose files</span> or drag and drop</p>
-                <p style={{ fontSize: 12, marginTop: 4 }}>PDF, DOCX, PPTX, XLSX, ZIP — up to 50 MB each</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>PDF, DOCX, PPTX, XLSX, ZIP, or any image — up to 50 MB each</p>
                 <input
                   type="file"
                   id="file-input"
                   style={{ display: 'none' }}
-                  accept=".pdf,.docx,.pptx,.xlsx,.zip"
+                  accept=".pdf,.docx,.pptx,.xlsx,.zip,.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.tiff,.ico,.avif"
                   multiple
                   onChange={e => e.target.files?.length && handleFilesSelect(e.target.files)}
                 />
