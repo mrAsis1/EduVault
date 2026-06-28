@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { IconCloudUpload, IconFileCheck, IconUpload, IconCheck, IconX } from '@tabler/icons-react'
 import { getSubjects, NO_SUBJECT, NO_TYPE, type Resource } from '../types'
+import type { DepartmentWithSubjects } from '../hooks/useDepartments'
 
 interface UploadModalProps {
   open: boolean
   resources: Resource[]
   editingResource: Resource | null
+  departments: DepartmentWithSubjects[]
   onClose: () => void
   onSave: (input: {
     id?: number
@@ -31,7 +33,7 @@ function detectFormat(filename: string): string {
   return ext && FORMATS.includes(ext) ? ext : 'FILE'
 }
 
-export default function UploadModal({ open, resources, editingResource, onClose, onSave }: UploadModalProps) {
+export default function UploadModal({ open, resources, editingResource, departments, onClose, onSave }: UploadModalProps) {
   const [title, setTitle] = useState('')
   const [subject, setSubject] = useState('')
   const [type, setType] = useState<Resource['type'] | ''>('')
@@ -144,7 +146,15 @@ export default function UploadModal({ open, resources, editingResource, onClose,
                   autoComplete="off"
                 />
                 <datalist id="subject-options">
-                  {existingSubjects.map(s => <option key={s} value={s} />)}
+                  {departments.map(dept =>
+                    dept.subjects.map(s => (
+                      <option key={`${dept.id}:${s}`} value={s} />
+                    ))
+                  )}
+                  {existingSubjects
+                    .filter(s => !departments.flatMap(d => d.subjects).includes(s))
+                    .map(s => <option key={s} value={s} />)
+                  }
                 </datalist>
                 {!existingSubjects.includes(subject.trim()) && subject.trim() && (
                   <p style={{ fontSize: 12, color: 'var(--master)', marginTop: 6 }}>

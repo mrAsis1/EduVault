@@ -1,4 +1,4 @@
-import { IconUpload, IconTrash, IconPencil, IconEye, IconEyeOff, IconLayoutGrid, IconList } from '@tabler/icons-react'
+import { IconUpload, IconTrash, IconPencil, IconEye, IconEyeOff, IconLayoutGrid, IconList, IconBuilding } from '@tabler/icons-react'
 
 interface ToolbarProps {
   count: number
@@ -19,6 +19,7 @@ interface ToolbarProps {
   onTypeChange: (type: string) => void
   onStatusChange: (status: string) => void
   onViewModeChange: (mode: 'grid' | 'list') => void
+  onManageDepts?: () => void
 }
 
 const filterPill = (active: boolean) => ({
@@ -55,6 +56,7 @@ export default function Toolbar({
   onUploadClick, onSelectToggle, onSelectAll,
   onBulkPublish, onBulkDraft, onBulkEdit, onBulkDelete,
   onTypeChange, onStatusChange, onViewModeChange,
+  onManageDepts,
 }: ToolbarProps) {
   return (
     <>
@@ -131,6 +133,11 @@ export default function Toolbar({
         <div style={{ flex: 1 }} />
         {isMaster && !isSelecting && (
           <>
+            {onManageDepts && (
+              <button className="btn btn-ghost btn-sm" onClick={onManageDepts}>
+                <IconBuilding size={15} /> Departments
+              </button>
+            )}
             <button className="btn btn-ghost btn-sm" onClick={onSelectToggle}>Select</button>
             <button className="btn btn-master" onClick={onUploadClick}>
               <IconUpload size={16} /> Upload
