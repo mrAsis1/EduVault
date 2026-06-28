@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import Toolbar from './components/Toolbar'
@@ -357,6 +358,7 @@ export default function App() {
         onHide={() => setToast(t => ({ ...t, visible: false }))}
       />
       <Analytics />
+      <SpeedInsights />
     </>
   )
 }
