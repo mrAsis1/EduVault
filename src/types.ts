@@ -14,6 +14,18 @@ export interface Resource {
   created_at?: string
 }
 
+export interface Department {
+  id: number
+  name: string
+  created_at?: string
+}
+
+export interface DepartmentSubject {
+  id: number
+  department_id: number
+  subject: string
+}
+
 export function getSubjects(resources: Resource[]): string[] {
   return Array.from(
     new Set(

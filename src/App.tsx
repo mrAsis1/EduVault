@@ -7,9 +7,11 @@ import UploadModal from './components/UploadModal'
 import DeleteModal from './components/DeleteModal'
 import BulkEditModal from './components/BulkEditModal'
 import PasswordModal from './components/PasswordModal'
+import DepartmentModal from './components/DepartmentModal'
 import Toast from './components/Toast'
 import { useResources } from './hooks/useResources'
 import { useTheme } from './hooks/useTheme'
+import { useDepartments } from './hooks/useDepartments'
 import { getSubjects } from './types'
 import type { Resource } from './types'
 
@@ -22,6 +24,12 @@ export default function App() {
   } = useResources()
 
   const { theme, toggleTheme } = useTheme()
+
+  const {
+    departments,
+    addDepartment, renameDepartment, deleteDepartment,
+    addSubjectToDept, removeSubjectFromDept,
+  } = useDepartments()
 
   const toolbarRef = useRef<HTMLDivElement>(null)
 
@@ -40,6 +48,7 @@ export default function App() {
   const [deletingResource, setDeletingResource] = useState<Resource | null>(null)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [bulkEditOpen, setBulkEditOpen] = useState(false)
+  const [deptModalOpen, setDeptModalOpen] = useState(false)
 
   const [toast, setToast] = useState({ message: '', isError: false, visible: false })
   const showToast = (message: string, isError = false) =>
@@ -51,11 +60,20 @@ export default function App() {
   )
 
   const filtered = useMemo(() => visibleResources.filter(r => {
-    const ms = activeSubject === 'All' || r.subject === activeSubject
+    let ms = true
+    if (activeSubject === 'All') {
+      ms = true
+    } else if (activeSubject.startsWith('dept:')) {
+      const deptName = activeSubject.replace('dept:', '')
+      const dept = departments.find(d => d.name === deptName)
+      ms = dept ? dept.subjects.includes(r.subject) : false
+    } else {
+      ms = r.subject === activeSubject
+    }
     const mt = activeType === 'All' || r.type === activeType
     const mst = !isMaster || activeStatus === 'All' || r.status === activeStatus
     return ms && mt && mst
-  }), [visibleResources, activeSubject, activeType, activeStatus, isMaster])
+  }), [visibleResources, activeSubject, activeType, activeStatus, isMaster, departments])
 
   const existingSubjects = useMemo(() => getSubjects(resources), [resources])
 
@@ -211,6 +229,7 @@ export default function App() {
       <div className="page">
         <Sidebar
           resources={visibleResources}
+          departments={departments}
           activeSubject={activeSubject}
           onSubjectChange={setActiveSubject}
           scrollTargetRef={toolbarRef}
@@ -237,6 +256,7 @@ export default function App() {
             onBulkDelete={() => setBulkDeleteOpen(true)}
             onTypeChange={setActiveType}
             onStatusChange={setActiveStatus}
+            onManageDepts={isMaster ? () => setDeptModalOpen(true) : undefined}
           />
 
           {loading ? (
@@ -275,6 +295,7 @@ export default function App() {
         open={uploadModalOpen}
         resources={resources}
         editingResource={editingResource}
+        departments={departments}
         onClose={() => { setUploadModalOpen(false); setEditingResource(null) }}
         onSave={handleSave}
       />
@@ -299,6 +320,33 @@ export default function App() {
         existingSubjects={existingSubjects}
         onClose={() => setBulkEditOpen(false)}
         onApply={handleBulkEditApply}
+      />
+
+      <DepartmentModal
+        open={deptModalOpen}
+        departments={departments}
+        existingSubjects={existingSubjects}
+        onClose={() => setDeptModalOpen(false)}
+        onAddDepartment={async name => {
+          await addDepartment(name)
+          showToast(`Department "${name}" added.`)
+        }}
+        onRenameDepartment={async (id, name) => {
+          await renameDepartment(id, name)
+          showToast(`Renamed to "${name}".`)
+        }}
+        onDeleteDepartment={async id => {
+          await deleteDepartment(id)
+          showToast('Department deleted.')
+        }}
+        onAddSubject={async (deptId, subject) => {
+          await addSubjectToDept(deptId, subject)
+          showToast(`"${subject}" added.`)
+        }}
+        onRemoveSubject={async (deptId, subject) => {
+          await removeSubjectFromDept(deptId, subject)
+          showToast(`"${subject}" removed.`)
+        }}
       />
 
       <Toast

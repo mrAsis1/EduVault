@@ -237,6 +237,14 @@ nav { background:var(--surface); border-bottom:1px solid var(--border); position
   mask-image: none;
 }
 
+/* DEPARTMENT TREE */
+.dept-btn { font-weight: 600; font-size: 12px !important; letter-spacing: 0.04em; text-transform: uppercase; }
+.dept-chevron-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 6px 8px 6px 2px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.12s; }
+.dept-chevron-btn:hover { color: var(--accent); }
+.subject-child-btn { padding-left: 20px !important; font-size: 13px; }
+.subject-child-btn:not(.active) { color: var(--muted); }
+.subject-child-btn.active { background: var(--accent-light); color: var(--accent-text); font-weight: 500; }
+
 @media (max-width: 540px) {
   .badge-short { display: inline; }
   .badge-full { display: none; }
