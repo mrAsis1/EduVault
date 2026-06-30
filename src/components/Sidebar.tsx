@@ -12,6 +12,7 @@ interface SidebarProps {
 }
 
 const EXPANDED_KEY = 'eduvault-expanded-depts'
+const ALL_EXPANDED_KEY = 'eduvault-expanded-all'
 
 export default function Sidebar({
   resources,
@@ -29,9 +30,21 @@ export default function Sidebar({
     }
   })
 
+  const [allExpanded, setAllExpanded] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(ALL_EXPANDED_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
+
   useEffect(() => {
     localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expandedDepts]))
   }, [expandedDepts])
+
+  useEffect(() => {
+    localStorage.setItem(ALL_EXPANDED_KEY, String(allExpanded))
+  }, [allExpanded])
 
   const toggleDept = (name: string) => {
     setExpandedDepts(prev => {
@@ -55,19 +68,29 @@ export default function Sidebar({
     scrollToTop()
   }
 
+  // Clicking "All Subjects" label: selects it AND toggles its dropdown open/closed
+  const handleAllClick = () => {
+    handleSelect('All')
+    setAllExpanded(s => !s)
+  }
+
+  // Clicking a department label: selects it AND toggles its dropdown open/closed
+  const handleDeptClick = (deptName: string) => {
+    handleSelect(`dept:${deptName}`)
+    toggleDept(deptName)
+  }
+
   const countForSubject = (subject: string) =>
     resources.filter(r => r.subject === subject).length
 
   const countForDept = (dept: DepartmentWithSubjects) =>
     resources.filter(r => dept.subjects.includes(r.subject)).length
 
-  // All dept subjects flattened
   const allDeptSubjects = useMemo(
     () => new Set(departments.flatMap(d => d.subjects)),
     [departments]
   )
 
-  // Subjects in resources that don't belong to any department
   const ungroupedSubjects = useMemo(() => {
     const inResources = Array.from(
       new Set(resources.map(r => r.subject).filter(s => s && s !== 'NOSUBJECT'))
@@ -75,7 +98,6 @@ export default function Sidebar({
     return inResources.filter(s => !allDeptSubjects.has(s))
   }, [resources, allDeptSubjects])
 
-  // Only show depts that have subjects with resources
   const activeDepts = useMemo(() =>
     departments.filter(dept =>
       dept.subjects.some(s => resources.some(r => r.subject === s))
@@ -83,21 +105,66 @@ export default function Sidebar({
     [departments, resources]
   )
 
+  // All subjects flattened for the "All Subjects" dropdown
+  const allSubjectsFlat = useMemo(() => {
+    return [
+      ...activeDepts.flatMap(dept =>
+        dept.subjects.filter(s => resources.some(r => r.subject === s))
+      ),
+      ...ungroupedSubjects,
+    ]
+  }, [activeDepts, ungroupedSubjects, resources])
+
   return (
     <aside className="sidebar">
       <div className="sidebar-section">
         <div className="sidebar-title">Subject</div>
 
-        {/* All Subjects */}
-        <button
-          className={`subject-btn ${activeSubject === 'All' ? 'active' : ''}`}
-          onClick={() => handleSelect('All')}
-        >
-          All Subjects
-          <span className="count">{resources.length}</span>
-        </button>
+        {/* ── All Subjects (toggleable dropdown) ── */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button
+              className={`subject-btn ${activeSubject === 'All' ? 'active' : ''}`}
+              style={{ flex: 1 }}
+              onClick={handleAllClick}
+            >
+              All Subjects
+              <span className="count">{resources.length}</span>
+            </button>
+            <button
+              onClick={() => setAllExpanded(s => !s)}
+              className="dept-chevron-btn"
+              title={allExpanded ? 'Collapse' : 'Expand'}
+            >
+              {allExpanded
+                ? <IconChevronDown size={14} />
+                : <IconChevronRight size={14} />
+              }
+            </button>
+          </div>
 
-        {/* Departments */}
+          {/* Dropdown list of every subject */}
+          <div
+            style={{
+              overflow: 'hidden',
+              maxHeight: allExpanded ? `${allSubjectsFlat.length * 60}px` : '0px',
+              transition: 'max-height 0.25s ease',
+            }}
+          >
+            {allSubjectsFlat.map(subject => (
+              <button
+                key={subject}
+                className={`subject-btn subject-child-btn ${activeSubject === subject ? 'active' : ''}`}
+                onClick={() => handleSelect(subject)}
+              >
+                <span style={{ flex: 1, textAlign: 'left' }}>{subject}</span>
+                <span className="count">{countForSubject(subject)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Departments (toggleable dropdowns) ── */}
         {activeDepts.map(dept => {
           const isExpanded = expandedDepts.has(dept.name)
           const deptCount = countForDept(dept)
@@ -111,7 +178,7 @@ export default function Sidebar({
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <button
                   className={`subject-btn dept-btn ${isDeptActive ? 'active' : ''}`}
-                  onClick={() => handleSelect(`dept:${dept.name}`)}
+                  onClick={() => handleDeptClick(dept.name)}
                   style={{ flex: 1 }}
                 >
                   <span>{dept.name}</span>
@@ -129,7 +196,7 @@ export default function Sidebar({
                 </button>
               </div>
 
-              {/* Animated collapse */}
+              {/* Animated subject list */}
               <div
                 style={{
                   overflow: 'hidden',
@@ -152,7 +219,7 @@ export default function Sidebar({
           )
         })}
 
-        {/* Ungrouped subjects */}
+        {/* ── Ungrouped subjects ── */}
         {ungroupedSubjects.map(subject => (
           <button
             key={subject}
