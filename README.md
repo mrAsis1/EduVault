@@ -2,7 +2,7 @@
 
 EduVault is a web-based educational resource platform where students can browse and download learning materials such as modules and exercises organized by subject.
 
-🌐 **Live Website:** https://edu-vault-iota-six.vercel.app
+🌐 **Live Website:** https://edu-vault-one-gray.vercel.app
 
 ## ✨ Features
 
