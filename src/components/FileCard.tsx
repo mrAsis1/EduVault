@@ -97,13 +97,20 @@ function EditableTitle({ resource, onRenameTitle }: EditableTitleProps) {
 
   return (
     <div
-      className="card-title"
-      style={{ cursor: 'text', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}
+      className="card-title card-title-scroll at-start"
+      style={{ cursor: 'text', display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 4 }}
       onClick={() => setEditing(true)}
+      onScroll={e => {
+        const el = e.currentTarget
+        const atStart = el.scrollTop <= 2
+        const atEnd = el.scrollTop >= el.scrollHeight - el.clientHeight - 2
+        el.classList.toggle('at-start', atStart)
+        el.classList.toggle('at-end', atEnd)
+      }}
       title="Click to rename"
     >
       <span style={{ flex: 1 }}>{resource.title}</span>
-      <IconPencil size={12} style={{ color: 'var(--muted)', flexShrink: 0, opacity: 0.5 }} />
+      <IconPencil size={12} style={{ color: 'var(--muted)', flexShrink: 0, opacity: 0.5, marginTop: 2 }} />
     </div>
   )
 }
@@ -116,6 +123,14 @@ export default function FileCard({
   const isDraft = resource.status === 'draft'
   const isList = viewMode === 'list'
   const setScrollRef = useScrollFade()
+
+  const handleTitleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget
+    const atStart = el.scrollTop <= 2
+    const atEnd = el.scrollTop >= el.scrollHeight - el.clientHeight - 2
+    el.classList.toggle('at-start', atStart)
+    el.classList.toggle('at-end', atEnd)
+  }
 
   if (isList) {
     return (
@@ -284,7 +299,14 @@ export default function FileCard({
       <div>
         {isMaster && !isSelecting
           ? <EditableTitle resource={resource} onRenameTitle={onRenameTitle} />
-          : <div className="card-title">{resource.title}</div>
+          : (
+            <div
+              className="card-title card-title-scroll at-start"
+              onScroll={handleTitleScroll}
+            >
+              {resource.title}
+            </div>
+          )
         }
         <div className="card-meta">
           <span>{resource.subject === NO_SUBJECT ? 'No subject' : resource.subject}</span>
