@@ -63,7 +63,7 @@ export default function Toolbar({
       {/* Sticky filter bar */}
       <div style={{
         position: 'sticky',
-        top: 56,
+        top: 'var(--toolbar-sticky-top)',
         zIndex: 90,
         background: 'var(--bg)',
         paddingTop: 10,

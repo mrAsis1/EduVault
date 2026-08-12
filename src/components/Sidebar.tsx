@@ -56,10 +56,7 @@ export default function Sidebar({
 
   const scrollToTop = () => {
     if (scrollTargetRef.current) {
-      const top =
-        scrollTargetRef.current.getBoundingClientRect().top +
-        window.scrollY - 56 - 8
-      window.scrollTo({ top, behavior: 'smooth' })
+      scrollTargetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 

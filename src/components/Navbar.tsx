@@ -3,12 +3,11 @@ import { IconCrown, IconSun, IconMoon } from '@tabler/icons-react'
 interface NavbarProps {
   isMaster: boolean
   theme: 'light' | 'dark'
-  onMasterClick: () => void
   onExitMaster: () => void
   onToggleTheme: () => void
 }
 
-export default function Navbar({ isMaster, theme, onMasterClick, onExitMaster, onToggleTheme }: NavbarProps) {
+export default function Navbar({ isMaster, theme, onExitMaster, onToggleTheme }: NavbarProps) {
   return (
     <nav>
       <div className="nav-inner">
@@ -21,13 +20,9 @@ export default function Navbar({ isMaster, theme, onMasterClick, onExitMaster, o
               <IconCrown size={14} /> Master mode
             </span>
           )}
-          {isMaster ? (
+          {isMaster && (
             <button className="btn btn-ghost btn-sm" onClick={onExitMaster}>
               Exit master
-            </button>
-          ) : (
-            <button className="btn btn-ghost btn-sm" onClick={onMasterClick}>
-              Master
             </button>
           )}
           <button

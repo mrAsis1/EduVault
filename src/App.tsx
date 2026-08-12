@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { ReactElement } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import Navbar from './components/Navbar'
@@ -17,7 +18,7 @@ import { useDepartments } from './hooks/useDepartments'
 import { getSubjects } from './types'
 import type { Resource } from './types'
 
-export default function App() {
+export default function App(): ReactElement {
   const {
     resources, loading, error,
     saveResource, bulkUpdate, bulkDelete,
@@ -34,6 +35,7 @@ export default function App() {
   } = useDepartments()
 
   const toolbarRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isMaster, setIsMaster] = useState(false)
@@ -44,7 +46,7 @@ export default function App() {
   const [isSelecting, setIsSelecting] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 
-  const [pwModalOpen, setPwModalOpen] = useState(false)
+  const [pwModalOpen, setPwModalOpen] = useState(() => window.location.pathname === '/admin')
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [editingResource, setEditingResource] = useState<Resource | null>(null)
   const [deletingResource, setDeletingResource] = useState<Resource | null>(null)
@@ -56,22 +58,51 @@ export default function App() {
   const showToast = (message: string, isError = false) =>
     setToast({ message, isError, visible: true })
 
+  useLayoutEffect(() => {
+    const heroElement = heroRef.current
+    if (!heroElement) return
+
+    const root = document.documentElement
+    const updateHeroHeight = () => {
+      root.style.setProperty('--hero-block-height', `${heroElement.offsetHeight}px`)
+    }
+
+    updateHeroHeight()
+
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateHeroHeight)
+      return () => {
+        window.removeEventListener('resize', updateHeroHeight)
+        root.style.removeProperty('--hero-block-height')
+      }
+    }
+
+    const observer = new ResizeObserver(updateHeroHeight)
+    observer.observe(heroElement)
+    window.addEventListener('resize', updateHeroHeight)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateHeroHeight)
+      root.style.removeProperty('--hero-block-height')
+    }
+  }, [])
+
   const visibleResources = useMemo(
     () => isMaster ? resources : resources.filter(r => r.status === 'public'),
     [resources, isMaster]
   )
 
   const filtered = useMemo(() => visibleResources.filter(r => {
-    let ms = true
-    if (activeSubject === 'All') {
-      ms = true
-    } else if (activeSubject.startsWith('dept:')) {
-      const deptName = activeSubject.replace('dept:', '')
-      const dept = departments.find(d => d.name === deptName)
-      ms = dept ? dept.subjects.includes(r.subject) : false
-    } else {
-      ms = r.subject === activeSubject
-    }
+    const ms = activeSubject === 'All'
+      ? true
+      : activeSubject.startsWith('dept:')
+        ? (() => {
+            const deptName = activeSubject.replace('dept:', '')
+            const dept = departments.find(d => d.name === deptName)
+            return dept ? dept.subjects.includes(r.subject) : false
+          })()
+        : r.subject === activeSubject
     const mt = activeType === 'All' || r.type === activeType
     const mst = !isMaster || activeStatus === 'All' || r.status === activeStatus
     return ms && mt && mst
@@ -87,7 +118,11 @@ export default function App() {
   const handleSelect = (resource: Resource) => {
     setSelectedIds(prev => {
       const next = new Set(prev)
-      next.has(resource.id) ? next.delete(resource.id) : next.add(resource.id)
+      if (next.has(resource.id)) {
+        next.delete(resource.id)
+      } else {
+        next.add(resource.id)
+      }
       return next
     })
   }
@@ -207,7 +242,6 @@ export default function App() {
       <Navbar
         isMaster={isMaster}
         theme={theme}
-        onMasterClick={() => setPwModalOpen(true)}
         onToggleTheme={toggleTheme}
         onExitMaster={() => {
           setIsMaster(false)
@@ -217,12 +251,12 @@ export default function App() {
         }}
       />
 
-      <div className="hero">
+      <div className="hero" ref={heroRef}>
         <div className="hero-inner">
           <div className="hero-top">
             <div>
               <h1>School Resources</h1>
-              <p>Browse, search, and download learning materials.</p>
+              <p>A platform where students can find and download school resources, including modules and exercises organized by subject.</p>
             </div>
           </div>
         </div>
