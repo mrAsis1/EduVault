@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MAW Blueprint Manifest",
+  "description": "Machine-readable companion to a blueprint's README.md. The README stays the source of truth for rationale and stack decisions (per ADR-0002); this manifest only re-expresses the resulting file/folder structure so automation/scripts/generate-project.mjs can scaffold it. Do not put explanatory prose here — that belongs in README.md.",
+  "type": "object",
+  "required": ["name", "description", "folders", "files"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Must match the blueprint's directory name under blueprints/."
+    },
+    "description": {
+      "type": "string",
+      "description": "One line, copied from the README's opening line."
+    },
+    "governedBy": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "modules/ directories this blueprint's stack decisions defer to."
+    },
+    "folders": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Empty directories to create, relative to the generated project root."
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path relative to the generated project root."
+          },
+          "template": {
+            "type": "string",
+            "description": "Filename of a template under blueprints/<name>/templates/, copied verbatim. Mutually exclusive with 'content'."
+          },
+          "content": {
+            "description": "Inline content. A JSON object is serialized with 2-space indent; a string is written as-is. Mutually exclusive with 'template'.",
+            "type": ["object", "string"]
+          },
+          "gitignore": {
+            "type": "boolean",
+            "description": "If true, the generator appends this path to the generated project's .gitignore instead of (or in addition to) writing it."
+          }
+        },
+        "oneOf": [
+          { "required": ["template"] },
+          { "required": ["content"] }
+        ]
+      }
+    },
+    "appliesInstructions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": ".github/instructions/*.md files that govern code written in this blueprint."
+    },
+    "appliesVerification": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "verification/*/ areas relevant to this stack."
+    },
+    "relatedDocuments": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

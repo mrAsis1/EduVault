@@ -1,0 +1,55 @@
+{
+  "$schema": "../blueprint.schema.json",
+  "name": "react-vite",
+  "description": "SPA with no backend — static frontend only.",
+  "governedBy": ["modules/react/", "modules/vite/", "modules/typescript/"],
+  "folders": [
+    "src/components",
+    "src/features"
+  ],
+  "files": [
+    {
+      "path": "src/main.tsx",
+      "template": "main.tsx.tmpl"
+    },
+    {
+      "path": "tsconfig.json",
+      "content": {
+        "compilerOptions": {
+          "strict": true,
+          "noUncheckedIndexedAccess": true,
+          "target": "ES2022",
+          "module": "ESNext",
+          "moduleResolution": "Bundler",
+          "jsx": "react-jsx",
+          "skipLibCheck": true
+        }
+      }
+    },
+    {
+      "path": ".env",
+      "content": "# VITE_-prefixed vars only are exposed to client code\n"
+    },
+    {
+      "path": ".env.local",
+      "content": "",
+      "gitignore": true
+    }
+  ],
+  "appliesInstructions": [
+    ".github/instructions/react.instructions.md",
+    ".github/instructions/typescript.instructions.md",
+    ".github/instructions/accessibility.instructions.md"
+  ],
+  "appliesVerification": [
+    "verification/design/",
+    "verification/code-quality/"
+  ],
+  "relatedDocuments": [
+    "modules/react/",
+    "modules/vite/",
+    "modules/typescript/",
+    "snippets/react/",
+    "snippets/typescript/"
+  ]
+}

@@ -1,0 +1,12 @@
+# Normalize all text files to LF in the repository, regardless of the
+# OS or editor used to create/edit them. Prevents the CRLF drift seen
+# when files pass through zip/unzip on Windows-adjacent tooling.
+* text=eol=lf
+
+# Explicit binary files (extend as needed) — never touched by EOL rules.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

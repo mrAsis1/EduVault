@@ -1,0 +1,48 @@
+name: Quality Gate
+
+# Template for a project built using MAW's conventions. Copy into your
+# own .github/workflows/, adjust the install/test commands for your
+# package manager and test runner. Jobs run in parallel so a fast lint
+# failure doesn't wait on a slower test suite, per
+# tools/github-actions/best-practices.md.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # - run: npm ci
+      # - run: npm run lint
+
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # - run: npm ci
+      # - run: npm run typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # - run: npm ci
+      # - run: npm test -- --coverage
+      # See verification/testing/checklist.md — coverage is a signal,
+      # not a pass/fail gate on its own; don't add a hard coverage
+      # threshold here without reading why first.

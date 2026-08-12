@@ -1,0 +1,18 @@
+{
+  "name": "maw-automation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Meta-tooling that validates and maintains the Monarch AI Workspace repository itself. Node built-ins only, no external dependencies.",
+  "type": "module",
+  "scripts": {
+    "check:structure": "node scripts/validate-structure.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "check:adrs": "node scripts/check-adr-order.mjs",
+    "check:roadmap": "node scripts/check-roadmap-sync.mjs",
+    "audit": "npm run check:structure && npm run check:links && npm run check:adrs && npm run check:roadmap",
+    "generate:verification-area": "node generators/new-verification-area.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,53 @@
+name: MAW Audit
+
+# Runs automation/'s meta-tooling on every PR, per
+# tools/github-actions/best-practices.md — CI enforces what the docs
+# describe, mechanically, instead of relying on manual review to catch
+# structural drift (broken links, ADR ordering, roadmap/disk mismatch).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  structure:
+    name: Validate structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node automation/scripts/validate-structure.mjs
+
+  links:
+    name: Check links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node automation/scripts/check-links.mjs
+
+  adrs:
+    name: Check ADR order
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node automation/scripts/check-adr-order.mjs
+
+  roadmap:
+    name: Check roadmap sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node automation/scripts/check-roadmap-sync.mjs
