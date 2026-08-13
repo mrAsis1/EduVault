@@ -89,7 +89,7 @@ nav { background:color-mix(in srgb, var(--surface) 96%, transparent); border-bot
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* HERO */
-.hero { background:linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 82%, var(--bg)) 100%); border-bottom:1px solid var(--border); padding:40px 24px 30px; position:sticky; top:var(--nav-sticky-offset); z-index:95; }
+.hero { background:linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 82%, var(--bg)) 100%); border-bottom:1px solid var(--border); padding: 0 24px; position:sticky; top:var(--nav-sticky-offset); z-index:95; }
 .hero-inner { max-width:1140px; margin:0 auto; }
 .hero-top { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
 .hero h1 { font-family:'Sora',sans-serif; font-size:28px; font-weight:700; margin-bottom:6px; letter-spacing:-0.02em; }
@@ -104,7 +104,7 @@ nav { background:color-mix(in srgb, var(--surface) 96%, transparent); border-bot
 
 /* SIDEBAR */
 .sidebar { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; position:sticky; top:calc(var(--nav-sticky-offset) + var(--hero-block-height)); box-shadow:var(--shadow); display:flex; flex-direction:column; }
-.sidebar-section { padding:16px; border-bottom:1px solid var(--border); overflow-y:auto; overscroll-behavior:contain; flex:1 1 auto; min-height:0; }
+.sidebar-section { padding:16px 16px 32px; border-bottom:1px solid var(--border); overflow-y:auto; overscroll-behavior:contain; flex:1 1 auto; min-height:0; }
 .sidebar-section:last-child { border-bottom:none; }
 .sidebar-title { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); margin-bottom:10px; }
 .subject-btn { display:flex; align-items:center; width:100%; padding:9px 11px; border-radius:var(--radius); border:none; background:transparent; color:var(--muted); font-size:14px; font-family:'Inter',sans-serif; cursor:pointer; transition:background 0.12s,color 0.12s; text-align:left; gap:8px; }

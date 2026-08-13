@@ -11,7 +11,7 @@ interface SidebarProps {
   scrollTargetRef: React.RefObject<HTMLDivElement | null>
 }
 
-const EXPANDED_KEY = 'eduvault-expanded-depts'
+const EXPANDED_KEY = 'eduvault-expanded-dept'
 const ALL_EXPANDED_KEY = 'eduvault-expanded-all'
 
 export default function Sidebar({
@@ -21,12 +21,11 @@ export default function Sidebar({
   onSubjectChange,
   scrollTargetRef,
 }: SidebarProps) {
-  const [expandedDepts, setExpandedDepts] = useState<Set<string>>(() => {
+  const [expandedDept, setExpandedDept] = useState<string | null>(() => {
     try {
-      const stored = localStorage.getItem(EXPANDED_KEY)
-      return stored ? new Set(JSON.parse(stored)) : new Set<string>()
+      return localStorage.getItem(EXPANDED_KEY)
     } catch {
-      return new Set<string>()
+      return null
     }
   })
 
@@ -39,19 +38,20 @@ export default function Sidebar({
   })
 
   useEffect(() => {
-    localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expandedDepts]))
-  }, [expandedDepts])
+    if (expandedDept) {
+      localStorage.setItem(EXPANDED_KEY, expandedDept)
+    } else {
+      localStorage.removeItem(EXPANDED_KEY)
+    }
+  }, [expandedDept])
 
   useEffect(() => {
     localStorage.setItem(ALL_EXPANDED_KEY, String(allExpanded))
   }, [allExpanded])
 
   const toggleDept = (name: string) => {
-    setExpandedDepts(prev => {
-      const next = new Set(prev)
-      next.has(name) ? next.delete(name) : next.add(name)
-      return next
-    })
+    setAllExpanded(false)
+    setExpandedDept(prev => prev === name ? null : name)
   }
 
   const scrollToTop = () => {
@@ -68,6 +68,7 @@ export default function Sidebar({
   // Clicking "All Subjects" label: selects it AND toggles its dropdown open/closed
   const handleAllClick = () => {
     handleSelect('All')
+    setExpandedDept(null)
     setAllExpanded(s => !s)
   }
 
@@ -163,7 +164,7 @@ export default function Sidebar({
 
         {/* ── Departments (toggleable dropdowns) ── */}
         {activeDepts.map(dept => {
-          const isExpanded = expandedDepts.has(dept.name)
+          const isExpanded = expandedDept === dept.name
           const deptCount = countForDept(dept)
           const deptSubjects = dept.subjects.filter(s =>
             resources.some(r => r.subject === s)
@@ -197,7 +198,7 @@ export default function Sidebar({
               <div
                 style={{
                   overflow: 'hidden',
-                  maxHeight: isExpanded ? `${deptSubjects.length * 60}px` : '0px',
+                  maxHeight: isExpanded ? '9999px' : '0px',
                   transition: 'max-height 0.25s ease',
                 }}
               >
