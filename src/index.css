@@ -19,6 +19,9 @@
   --nav-sticky-offset: 65px;
   --hero-block-height: 0px;
   --toolbar-sticky-top: calc(var(--nav-sticky-offset) + var(--hero-block-height));
+  --page-pad-top: 28px;
+  --page-pad-inline: 24px;
+  --page-pad-bottom: 36px;
 }
 
 /* ── Dark theme ─────────────────────────────────────────────────────── */
@@ -100,7 +103,7 @@ nav { background:color-mix(in srgb, var(--surface) 96%, transparent); border-bot
 .stat-card .value { font-family:'Sora',sans-serif; font-size:24px; font-weight:700; }
 
 /* LAYOUT */
-.page { max-width:1140px; margin:0 auto; padding:28px 24px 36px; display:grid; grid-template-columns:220px 1fr; gap:24px; align-items:start; }
+.page { max-width:1140px; margin:0 auto; padding:var(--page-pad-top) var(--page-pad-inline) var(--page-pad-bottom); display:grid; grid-template-columns:220px 1fr; gap:24px; align-items:start; }
 
 /* SIDEBAR */
 .sidebar { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; position:sticky; top:calc(var(--nav-sticky-offset) + var(--hero-block-height)); box-shadow:var(--shadow); display:flex; flex-direction:column; }
@@ -314,7 +317,10 @@ nav { background:color-mix(in srgb, var(--surface) 96%, transparent); border-bot
   .sidebar {
     top: 0;
     align-self: start;
-    max-height: calc(100dvh - var(--nav-sticky-offset) - var(--hero-block-height) - 24px);
+    max-height: calc(
+      100dvh - var(--nav-sticky-offset) - var(--hero-block-height) - var(--page-pad-top) - var(--page-pad-bottom)
+    );
+    min-height: 0;
   }
 
   .content {
